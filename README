@@ -1,0 +1,12 @@
+= remarks to the user =
+
+The main purpose of this plugin is to track the single molecule fluorescence particles. 
+But the objects which can be discrimanted by threshold can be detected and tracked (for example, moving cells). 
+
+What can do this plugin?
+
+PTA is a plugin which runs on ImageJ?
+
+    Detecting and Tracking the multiple particles simultaneously.
+    The detection method is centroid and 2 dimensional Gaussian distribution fitting by Levenberg-Marquardt method.
+    Running on MacOSX (Intel CPU, 64 bit) and Windows (32bit and 64bit). 
