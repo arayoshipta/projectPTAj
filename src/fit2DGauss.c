@@ -7,9 +7,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <cminpack.h>
 #include <math.h>
 #include "PTA_.h"
-#include <cminpack.h>
 #define PI 3.14159
 
 int iteration;
@@ -17,7 +17,7 @@ int iterationMax;
 
 double *fdata;
 int size;
-double f2dGauss(double xin, const double *x,int size);
+double f2dGauss(int xin, const double *x,int size);
 int fcn(void *p, int m, int n, const double *x, double *fvec, int iflag);
 
 
@@ -81,7 +81,7 @@ JNIEXPORT jdoubleArray JNICALL Java_PTA_1_fit2DGauss(JNIEnv *env,
 	return retParam;
 }
 
-double f2dGauss(double xin, const double *x,int size)
+double f2dGauss(int xin, const double *x,int size)
 /**
  * 2-dimensional gaussian function
  * In general, 2D gaussian distribution is described as,
@@ -99,16 +99,18 @@ double f2dGauss(double xin, const double *x,int size)
  */
 {
 	double expx, expy, argx, argy, sqr;
-	int i;
-	double y=0;
-	for(i=0;i<size;i++) {
-		argx = xin-(x[3]+i*size);
-		argy = i-x[4];
-		expx = exp(-argx*argx/(2*x[1]*x[1]));
-		expy = exp(-argy*argy/(2*x[2]*x[2]));
-		sqr = sqrt(x[1]*x[2]);
-		y += x[0]*expx*expy/(2*PI*sqr);
-	}
+	double y;
+	double xindx, yindx;
+	
+	xindx = xin%size;
+	yindx = xin/size;
+	
+	argx = xindx -x[3];
+	argy = yindx-x[4];
+	expx = exp(-argx*argx/(2*x[1]*x[1]));
+	expy = exp(-argy*argy/(2*x[2]*x[2]));
+	sqr = sqrt(x[1]*x[2]);
+	y = x[0]*expx*expy/(2*PI*sqr);
 	y += x[5];
 	return y;
 }
