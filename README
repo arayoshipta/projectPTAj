@@ -9,17 +9,4 @@ PTA is a plugin which runs on ImageJ?
 
     Detecting and Tracking the multiple particles simultaneously.
     The detection method is centroid and 2 dimensional Gaussian distribution fitting by Levenberg-Marquardt method.
-    Running on MacOSX (Intel CPU, 64 bit) and Windows (32bit and 64bit).
-
-How to use this plugin?
-
-    I strongly recommend you to read Manuals.
-    This is a brief way to install this plugin.
-
-    1.    Check your platform. For MacOSX (64bit) and Windows (32bit, 64bit) platforms are available.
-    2.	Put jar files in /jar folder (PTA_.jar, jcommon.jar, jfreechart.jar) to your “ImageJ/plugins” folder
-    3.	Put “Fit2DGauss.dll” (for Win) or “libfit2DGauss.jnilib” in “/lib” folder to your “ImageJ” folder (not plugins folder).
-
-Good luck!
-
-Yoshiyuki Arai
+    Running on MacOSX (Intel CPU, 64 bit) and Windows (32bit and 64bit). 
