@@ -17,8 +17,8 @@ How to use this plugin?
     This is a brief way to install this plugin.
 
     1.    Check your platform. For MacOSX (64bit) and Windows (32bit, 64bit) platforms are available.
-    2.	Put jar files in /jar folder (PTA_.jar, jcommon.jar, jfreechart.jar) to your ÅgImageJ/pluginsÅh folder
-    3.	Put ÅgFit2DGauss.dllÅh (for Win) or Åglibfit2DGauss.jnilibÅh in Åg/libÅh folder to your ÅgImageJÅh folder (not plugins folder).
+    2.	Put jar files in /jar folder (PTA_.jar, jcommon.jar, jfreechart.jar) to your ImageJ/plugins folder
+    3.	Put fit2DGauss.dll (for Win) or libfit2DGauss.jnilib (for MacOSX) in lib folder to your ImageJ older (not plugins folder).
 
 Good luck!
 
