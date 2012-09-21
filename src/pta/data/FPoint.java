@@ -21,7 +21,8 @@ public class FPoint implements Serializable{
 	private FPoint pre;
 	private FPoint post;
 	private int frame;
-	private int size;
+	private int sizex;
+	private int sizey;
 	private double pixelHeight;
 	private double pixelWidth;
 	private double frameInterval;
@@ -30,13 +31,14 @@ public class FPoint implements Serializable{
 	
 	FPoint() {this.pre=null;this.post=null;}
 	
-	public FPoint(int sx, int sy, double[] param, double roiInt, int[] info, int size, Color color,int frame,Calibration cal) {
+	public FPoint(int sx, int sy, double[] param, double roiInt, int[] info, int[] size, Color color,int frame,Calibration cal) {
 		this.setParam(param);
 		this.setRoiInt(roiInt);
 		this.setInfo(info);
 		this.setSx(sx);
 		this.setSy(sy);
-		this.setSize(size);
+		this.setSizex(size[0]);
+		this.setSizey(size[1]);
 		this.setColor(color);
 		pixelWidth = cal.pixelWidth;
 		pixelHeight = cal.pixelHeight;
@@ -170,12 +172,27 @@ public class FPoint implements Serializable{
 		return frame;
 	}
 
-	public void setSize(int size) {
-		this.size = size;
+	public void setSizex(int size) {
+		this.sizex = size;
+	}
+	
+	public void setSizey(int size) {
+		this.sizey = size;
 	}
 
-	public int getSize() {
-		return size;
+	public int getSizex() {
+		return sizex;
+	}
+
+	public int getSizey() {
+		return sizey;
+	}
+	
+	public int[] getSize() {
+		int[] ret = new int[2];
+		ret[0]=sizex;
+		ret[1]=sizey;
+		return ret;
 	}
 	
 	public double getRoiInt() {
@@ -183,8 +200,8 @@ public class FPoint implements Serializable{
 	}
 
 	public Roi retRoi() {
-		Roi retRoi = new Roi((int)(Math.round((cx/pixelWidth-(double)size/2))),(int)(Math.round((cy/pixelHeight-(double)size/2))),
-				size,size);
+		Roi retRoi = new Roi((int)(Math.round((cx/pixelWidth-(double)sizex/2))),(int)(Math.round((cy/pixelHeight-(double)sizey/2))),
+				sizex,sizey);
 		retRoi.setStrokeColor(color);
 		return retRoi;
 	}

@@ -32,7 +32,7 @@ import ij.process.ImageProcessor;
 public class PTA extends PlugInFrame{
 
 	private static final long serialVersionUID = 1L;
-	public native static double[] fit2DGauss(double[] y, double[] x, int size, int[] info);
+	public native static double[] fit2DGauss(double[] y, double[] x, int sizex, int sizey, int[] info);
 	// Load fit2DGauss Library
 	static {
 		System.loadLibrary("fit2DGauss");
@@ -44,7 +44,8 @@ public class PTA extends PlugInFrame{
 	private static List<List<FPoint>> pointlist;
 	private static int[] selectedList;
 
-	private PtaParam ptap = new PtaParam.Builder(11, false).build();
+//	private PtaParam ptap = new PtaParam.Builder(12,12, false,false).build();
+	private PtaParam ptap = new PtaParam.Builder(12,12, false).build();
 
 	private Roi scanAreaRoi;
 
@@ -72,12 +73,19 @@ public class PTA extends PlugInFrame{
 	private JPanel jParamPanel;
 	private JPanel jParamPanelBasic;
 	private JPanel jParamPanelAdvanced;
+	// for variable x and y RoiSize
+	private JPanel jParamPanelRoiSizex;
+	private JPanel jParamPanelRoiSizey;
+	//
 	private JPanel jPanel1;
 	private JCheckBox j2DGaussCheckbox;
 	private JCheckBox jAllFramesCheckbox;
 	private JCheckBox jRoiCheckBox;
 	private JCheckBox jNumberCheckBox;
 	private JCheckBox jAllCheckBox;
+	// test for LMA with JAMA
+//	private JCheckBox jLmaCheckbox;
+	//
 	private JCheckBox jAutomaticTrackCheckBox;
 	private static JCheckBox jDebugCheckbox;
 	private static JComboBox jDetectMethodCombobox;
@@ -86,7 +94,8 @@ public class PTA extends PlugInFrame{
 	private JButton jTrackButton;
 	private JButton jPreviewButton;
 	private JButton jUpdateTableButton;
-	private JLabel jLabel1;
+	private JLabel jRoiSizexLabel;
+	private JLabel jRoiSizeyLabel;
 	private JLabel jLabel10;
 	private JLabel jLabel11;
 	private JLabel jLabel2;
@@ -95,7 +104,10 @@ public class PTA extends PlugInFrame{
 	private JLabel jLabel6;
 	private JLabel jLabel7;
 	private JLabel jLabel9;
-	private JSpinner jRoiSizeSpinner;
+	//variable x and y roiSize
+	private JSpinner jRoiSizexSpinner;
+	private JSpinner jRoiSizeySpinner;
+	//
 	private JSpinner jMinIntSpinner;
 	private JSpinner jMinSizeSpinner;
 	private JSpinner jNearestRangeSpinner;
@@ -164,6 +176,9 @@ public class PTA extends PlugInFrame{
 		j2DGaussCheckbox = new JCheckBox();
 		jAutomaticTrackCheckBox = new JCheckBox();
 		jAllFramesCheckbox = new JCheckBox();
+		//test for LMA with JAMA
+//		jLmaCheckbox = new JCheckBox();
+		//
 		jAppearPanel = new JPanel();
 		jShowPathPanel = new JPanel();
 		jIntensityPanel = new JPanel();
@@ -190,8 +205,15 @@ public class PTA extends PlugInFrame{
 		jParamPanel = new JPanel();
 		jParamPanelBasic = new JPanel();
 		jParamPanelAdvanced = new JPanel();
-		jLabel1 = new JLabel();
-		jRoiSizeSpinner = new JSpinner(new SpinnerNumberModel(12,5,50,1));
+		// variable x and y size of Roi
+		jParamPanelRoiSizex = new JPanel();
+		jParamPanelRoiSizey = new JPanel();
+
+		jRoiSizexLabel = new JLabel();
+		jRoiSizexSpinner = new JSpinner(new SpinnerNumberModel(12,5,50,1));
+		jRoiSizeyLabel = new JLabel();
+		jRoiSizeySpinner = new JSpinner(new SpinnerNumberModel(12,5,50,1));
+		//
 		jLabel2 = new JLabel();
 		jMinIntSpinner = new JSpinner(new SpinnerNumberModel(ptap.getMinIntensity(),0,65535,1));
 		jLabel3 = new JLabel();
@@ -303,7 +325,7 @@ public class PTA extends PlugInFrame{
 								ol.add(sr);
 							} 
 							if(jNumberCheckBox.isSelected()){ // show the number beside ROI
-								int size = p.getSize();
+								int size = p.getSizex();
 								Roi numRoi;
 								numRoi = new TextRoi((int)(p.getCx()/cal.pixelWidth)+size/2+2, (int)(p.getCy()/cal.pixelHeight)-size/2,
 										String.valueOf(pointlist.indexOf(focusedlist)),
@@ -372,6 +394,8 @@ public class PTA extends PlugInFrame{
 					scanAreaRoi =imp.getRoi();
 				dp = new DetectParticle(ptap,imp,scanAreaRoi,pData);
 				ptap.setDo2dGaussfit(j2DGaussCheckbox.isSelected());
+				// test by LMA with JAMA
+//				ptap.setDo2dGaussfitbyLMA(jLmaCheckbox.isSelected());
 				dp.setPtap(ptap);
 				dp.setScanRoi(scanAreaRoi);
 				if(jAllFramesCheckbox.isSelected())
@@ -398,7 +422,7 @@ public class PTA extends PlugInFrame{
 		j2DGaussCheckbox.setText("2-DGaussian Fit");
 		jTrackSubPanel2.add(j2DGaussCheckbox);
 		j2DGaussCheckbox.addActionListener(new ActionListener() {
-			@Override
+			
 			public void actionPerformed(ActionEvent e) {
 				ptap.setDo2dGaussfit(j2DGaussCheckbox.isSelected());
 				if(jAutomaticTrackCheckBox.isSelected())
@@ -410,6 +434,18 @@ public class PTA extends PlugInFrame{
 		jTrackPanel.add(jTrackSubPanel2);
 		jAllFramesCheckbox.setText("All Frames");
 		jTrackSubPanel2.add(jAllFramesCheckbox);
+//		jLmaCheckbox.setText("Fit by LMA with JAMA");
+//		jTrackSubPanel2.add(jLmaCheckbox);
+//		// ---from--- test for LMA
+//		jLmaCheckbox.addActionListener(new ActionListener() {
+//			
+//			public void actionPerformed(ActionEvent e) {
+//				ptap.setDo2dGaussfitbyLMA(jLmaCheckbox.isSelected());
+//				if(jAutomaticTrackCheckBox.isSelected())
+//					scanOneFrame(imp);
+//			}
+//		});
+//		// ---to---
 		jPanel1.add(jTrackPanel);
 
 // set Appearance Panel
@@ -468,7 +504,7 @@ public class PTA extends PlugInFrame{
 		jIntensityPanel.add(jSubBgCheckBox);
 		jUpdateTableButton.setText("Update Table");
 		jUpdateTableButton.addActionListener(new ActionListener() {
-			@Override
+			
 			public void actionPerformed(ActionEvent arg0) {
 				if(pData != null)
 					pData.updateTableFI();
@@ -483,7 +519,7 @@ public class PTA extends PlugInFrame{
 		jLoadParamButton.setText("Load Param");
 		jOthersPanel.add(jLoadParamButton);
 		jLoadParamButton.addActionListener(new ActionListener() {
-			@Override
+			
 			public void actionPerformed(ActionEvent e) {
 				OpenDialog od = new OpenDialog("Load Parameters",null);
 				File inFile = new File(od.getDirectory(),od.getFileName());
@@ -501,7 +537,7 @@ public class PTA extends PlugInFrame{
 		jSaveParamButton.setText("Save Param");
 		jOthersPanel.add(jSaveParamButton);
 		jSaveParamButton.addActionListener(new ActionListener() {
-			@Override
+			
 			public void actionPerformed(ActionEvent e) {
 				SaveDialog sd = new SaveDialog("Save Parameters","Parameters",".dat");
 				File file = new File(sd.getDirectory(),sd.getFileName());
@@ -532,6 +568,7 @@ public class PTA extends PlugInFrame{
 					Object[][] objData = (Object[][])ois.readObject();
 					if ((imp=WindowManager.getImage(impName)) == null) {
 						IJ.error("Please open (or rename?) the "+impName);
+						ois.close();
 						return;
 					}
 					else {
@@ -556,13 +593,21 @@ public class PTA extends PlugInFrame{
 		jParamPanelBasic.setLayout(new GridLayout(4,2));
 		jParamPanelAdvanced.setBorder(javax.swing.BorderFactory.createTitledBorder("Advanced"));
 		jParamPanelAdvanced.setLayout(new GridLayout(4,2));
-
-		jLabel1.setText("RoiSize (pixel)");
-		jParamPanelBasic.add(jLabel1);
-		jParamPanelBasic.add(jRoiSizeSpinner);
-		jRoiSizeSpinner.addChangeListener(pcl);
-
-		jLabel2.setText("Min Intensity ");
+		
+		// varialbe x and y RoiSize
+		jRoiSizexLabel.setText("RoiSize x");
+		jParamPanelRoiSizex.add(jRoiSizexLabel);
+		jParamPanelRoiSizex.add(jRoiSizexSpinner);
+		jRoiSizeyLabel.setText("RoiSize y");
+		jParamPanelRoiSizey.add(jRoiSizeyLabel);
+		jParamPanelRoiSizey.add(jRoiSizeySpinner);
+		jRoiSizexSpinner.addChangeListener(pcl);
+		jRoiSizeySpinner.addChangeListener(pcl);
+		jParamPanelBasic.add(jParamPanelRoiSizex);
+		jParamPanelBasic.add(jParamPanelRoiSizey);
+		//
+		
+		jLabel2.setText("Min Intensity");
 		jParamPanelBasic.add(jLabel2);
 		jParamPanelBasic.add(jMinIntSpinner);
 		jMinIntSpinner.addChangeListener(pcl);
@@ -619,7 +664,9 @@ public class PTA extends PlugInFrame{
 	}
 
 	protected void spinParamSet() {
-		jRoiSizeSpinner.setValue(ptap.getRoiSize());
+		jRoiSizexSpinner.setValue(ptap.getRoiSizex());
+		jRoiSizeySpinner.setValue(ptap.getRoiSizey());
+
 		jMinIntSpinner.setValue(ptap.getMinIntensity());
 		jMinSizeSpinner.setValue(ptap.getMinSize());
 		jNearestRangeSpinner.setValue(ptap.getNearstRange());
@@ -667,7 +714,7 @@ public class PTA extends PlugInFrame{
 
 		private static final long serialVersionUID = 1L;
 
-		@Override
+		
 		public void actionPerformed(ActionEvent arg0) {
 			if(pData == null) return;
 			pData.updatejt();
@@ -676,7 +723,7 @@ public class PTA extends PlugInFrame{
 		
 	}
 	class checkBoxAction implements ActionListener {
-		@Override
+		
 		public void actionPerformed(ActionEvent e) {
 			if(imp == null) return;
 			imp.updateAndDraw();
@@ -723,7 +770,7 @@ public class PTA extends PlugInFrame{
 
 	class ParamChangeListener implements ChangeListener {
 
-		@Override
+		
 		public void stateChanged(ChangeEvent e) {
 			ptap.setIterationNumber((Integer)jIteSpinner.getValue());
 			ptap.setKurtosis((Double)jKurtosisSpinner.getValue());
@@ -731,7 +778,10 @@ public class PTA extends PlugInFrame{
 			ptap.setNearstRange((Double)jNearestRangeSpinner.getValue());
 			ptap.setMinIntensity((Double)jMinIntSpinner.getValue());
 			ptap.setMinSize((Integer)jMinSizeSpinner.getValue());
-			ptap.setRoiSize((Integer)jRoiSizeSpinner.getValue());
+			// varible x and y roisize
+			ptap.setRoiSizex((Integer)jRoiSizexSpinner.getValue());
+			ptap.setRoiSizey((Integer)jRoiSizeySpinner.getValue());			
+			//
 			ptap.setSearchPointIncrement((Integer)jSearchIncSpinner.getValue());
 			ptap.setDo2dGaussfit(j2DGaussCheckbox.isSelected());
 			isParamChanged = true;
@@ -741,7 +791,7 @@ public class PTA extends PlugInFrame{
 	
 	class bgChangeListener implements ActionListener {
 
-		@Override
+		
 		public void actionPerformed(ActionEvent e) {
 			if(jBgCheckBox.isSelected())
 				jSubBgCheckBox.setEnabled(true);
@@ -755,7 +805,6 @@ public class PTA extends PlugInFrame{
 	
 	class bgLenChangeListener implements ChangeListener {
 
-		@Override
 		public void stateChanged(ChangeEvent e) {
 			if (pData !=null) {
 				pData.updatejt();

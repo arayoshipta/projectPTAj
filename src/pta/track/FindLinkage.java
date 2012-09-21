@@ -22,7 +22,8 @@ public class FindLinkage {
 		this.imp = imp;
 		this.cal = imp.getCalibration();
 		this.alldplist = alldplist;
-		this.linkageSize = ptap.getNearstRange()*ptap.getRoiSize()*cal.pixelWidth;
+		// linkageSize is determined more small size of x or y
+		this.linkageSize = ptap.getNearstRange()*(ptap.getRoiSizex()>ptap.getRoiSizey()?ptap.getRoiSizex():ptap.getRoiSizey())*cal.pixelWidth;
 		this.linkageFrame = ptap.getLinkageFrame()+1;
 	}
 

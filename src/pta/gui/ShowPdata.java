@@ -59,6 +59,7 @@ public class ShowPdata extends JFrame{
 	static ChartPanel FIHistoPanel,durationHistoPanel,sdFIHistoPanel,aveOstHistoPanel,sdOstHistoPanel,
 	runLengthHistoPanel,aveXHistoPanel,sdXHistoPanel,aveYHistoPanel,sdYHistoPanel;
 	private ShowPdata pData;
+	public int size;
 
 	/*
 	 * constructor
@@ -648,7 +649,8 @@ public class ShowPdata extends JFrame{
 				Roi preRoi = imp.getRoi();
 				for(int index:selectedList) {
 					List<FPoint> pl = pointlist.get(index);
-					final int size = pl.get(0).getSize();
+					final int sizex = pl.get(0).getSizex();
+					final int sizey = pl.get(0).getSizey();
 					for(FPoint p:pl) {
 						int currentFrame = p.getFrame();
 						int x=p.getSx(),y=p.getSy();
@@ -657,28 +659,31 @@ public class ShowPdata extends JFrame{
 						ImageProcessor ip = imp.getProcessor();
 						FloatProcessor fip = (FloatProcessor) ip.convertToFloat();
 						double[] param = p.getParam();
-						double[] fionaData = new double[size*size];
+						double[] fionaData = new double[sizex*sizey];
 						double[] newParam = new double[6];
 						float[] pixVal = (float[])fip.getPixels();
 						int[] info = new int[2];
 						info[1] = ptap.getIterationNumber();
-						for(int ii=0;ii<size*size;ii++) {
-							int ix=ii%size,iy=ii/size;
-							fionaData[ix+iy*size] = (double)pixVal[x+ix+(y+iy)*imp.getWidth()];				
+						for(int ii=0;ii<sizex*sizey;ii++) {
+							int ix=ii%sizex,iy=ii/sizex;
+							fionaData[ix+iy*sizex] = (double)pixVal[x+ix+(y+iy)*imp.getWidth()];				
 						}
-						imp.setRoi(new Roi(x,y,size,size));
+						imp.setRoi(new Roi(x,y,sizex,sizey));
 
-						param[1] /= cal.pixelWidth;param[2] /= cal.pixelHeight;
-						param[3] = param[4] = size/2;
-						newParam = PTA.fit2DGauss(fionaData,param,size,info); //DO 2d Gaussian Fitting!
+						param[1] /= cal.pixelWidth;
+						param[2] /= cal.pixelHeight;
+						param[3] = sizex/2.0D;
+						param[4] = sizey/2.0D;
+						newParam = PTA.fit2DGauss(fionaData,param,sizex,sizey,info); //DO 2d Gaussian Fitting!
 						newParam[3] = (newParam[3]+x)*cal.pixelWidth;newParam[4]=(newParam[4]+y)*cal.pixelHeight;
-						newParam[1] *= cal.pixelWidth;newParam[2] *=cal.pixelHeight;
+						newParam[1] *=cal.pixelWidth;
+						newParam[2] *=cal.pixelHeight;
 						if(info[0]==1
 								&& newParam[0]>ptap.getMinIntensity()
 								&& newParam[1]>0 && newParam[2]>0		
-								&& newParam[1]<=(double)size*cal.pixelWidth && newParam[2]<=(double)size*cal.pixelHeight
-								&& (newParam[3]-dx)<(double)size*cal.pixelWidth && (newParam[3]-dx)>0
-								&& (newParam[4]-dy)<(double)size*cal.pixelHeight && (newParam[4]-dy)>0) 
+								&& newParam[1]<=(double)sizex*cal.pixelWidth && newParam[2]<=(double)sizey*cal.pixelHeight
+								&& (newParam[3]-dx)<(double)sizex*cal.pixelWidth && (newParam[3]-dx)>0
+								&& (newParam[4]-dy)<(double)sizey*cal.pixelHeight && (newParam[4]-dy)>0) 
 						{
 							p.setParam(newParam);
 							p.setInfo(info);
@@ -689,9 +694,11 @@ public class ShowPdata extends JFrame{
 								IJ.log("*info:"+Arrays.toString(info)+", param:"+Arrays.toString(newParam));
 							}
 							IJ.log("fitting error occured: "+index+" frame: "+currentFrame);
-							param[3]=(param[3]+x)*cal.pixelWidth;param[4]=(param[4]+y)*cal.pixelHeight;
-							param[1] *= cal.pixelWidth;param[2] *= cal.pixelHeight;
-							p.setParam(param);
+//							param[3]=(param[3]+x)*cal.pixelWidth;
+//							param[4]=(param[4]+y)*cal.pixelHeight;
+//							param[1] *= cal.pixelWidth;
+//							param[2] *= cal.pixelHeight;
+//							p.setParam(param);
 						}
 					}
 					double avebg=0;

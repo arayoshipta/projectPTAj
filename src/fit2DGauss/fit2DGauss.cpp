@@ -20,8 +20,8 @@ int iteration;
 int iterationMax;
 
 double *fdata;
-int size;
-double f2dGauss(int, const double*,int);
+int sizex,sizey;
+double f2dGauss(int, const double*,int,int);
 int fcn(void*, int, int, const double*, double*, int);
 
 typedef struct  {
@@ -31,7 +31,7 @@ typedef struct  {
 
 JNIEXPORT jdoubleArray JNICALL Java_pta_PTA_fit2DGauss(JNIEnv *env,
 jclass jcla, jdoubleArray jdobFionaData,
-jdoubleArray jdobParam, jint s, jintArray jinfoParam) {
+jdoubleArray jdobParam, jint sx, jint sy, jintArray jinfoParam) {
 
 jsize paramLength = env->GetArrayLength(jdobParam); // to obtain a length of jdobParam
 jsize fionaDataLength = env->GetArrayLength(jdobFionaData); //
@@ -53,13 +53,14 @@ fdata[i] = static_cast<double>(jfdata[i]);
 for(int i=0;i<paramLength;i++)
 param[i] = static_cast<double>(jparam[i]);
 
-size = static_cast<int>(s);
+sizex = static_cast<int>(sx);
+sizey = static_cast<int>(sy);
 //
 int m, n, info=0, lwa, iwa[6];
 //
 n=paramLength;
 
-m=size*size;
+m=sizex*sizey;
 double *fvec = new double[m];
 
 lwa = n*m+5*n+m;
@@ -94,7 +95,7 @@ iteration = 0;
 return retParam;
 }
 
-double f2dGauss(int xin, const double *x,int size)
+double f2dGauss(int xin, const double *x,int sizex,int sizey)
 /**
 * 2-dimensional gaussian function
 * In general, 2D gaussian distribution is described as,
@@ -116,8 +117,8 @@ double y;
 double xindx, yindx;
 
 
-xindx = xin%size;
-yindx = xin/size;
+xindx = xin%sizex;
+yindx = xin/sizex;
 
 argx = xindx-x[3];
 argy = yindx-x[4];
@@ -134,8 +135,8 @@ int fcn(void *p, int m, int n, const double *x, double *fvec, int iflag)
 int i;
 const double *y = static_cast<fcndata_t*>(p)->y;
 
-for(i=0;i<size*size;i++) {
-fvec[i] = y[i] - f2dGauss(i,x,size);
+for(i=0;i<sizex*sizey;i++) {
+fvec[i] = y[i] - f2dGauss(i,x,sizex,sizey);
 }
 iteration++;
 if (iteration>iterationMax) iflag = -1; // if iteration is over 1000, lmdif is forced to stop

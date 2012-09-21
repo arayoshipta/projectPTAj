@@ -23,14 +23,29 @@ public class PtaParam implements Serializable{
 		this.nearstRange = nearstRange;
 	}
 
-	public int getRoiSize() {
-		return roiSize;
+	public int getRoiSizex() {
+		return roiSizex;
+	}
+	
+	public int getRoiSizey() {
+		return roiSizey;
 	}
 
-	public void setRoiSize(int roiSize) {
-		this.roiSize = roiSize;
+	public int[] getRoiSize() {
+		int[] ret = new int[2];
+		ret[0]=roiSizex;
+		ret[1]=roiSizey;
+		return ret;
 	}
-
+	
+	public void setRoiSizex(int roiSizex) {
+		this.roiSizex = roiSizex;
+	}
+	
+	public void setRoiSizey(int roiSizey) {
+		this.roiSizey = roiSizey;
+	}
+	
 	public int getLinkageFrame() {
 		return linkageFrame;
 	}
@@ -78,21 +93,31 @@ public class PtaParam implements Serializable{
 	public void setDo2dGaussfit(boolean do2dGaussfit) {
 		this.do2dGaussfit = do2dGaussfit;
 	}
+	
+//	public void setDo2dGaussfitbyLMA(boolean do2dGaussfitbyLMA) {
+//		this.do2dGaussfitbyLMA = do2dGaussfitbyLMA;
+//	}
+//	
+//	public boolean isDo2dGaussfitbyLMA() {
+//		return do2dGaussfitbyLMA;
+//	}
 
 	private int IterationNumber;
 	private double nearstRange; // the distance range to recognize the particle as same particle.
-	private int roiSize;
+	private int roiSizex,roiSizey;
 	private int linkageFrame;
 	private int searchPointIncrement;
 	private double minIntensity;
 	private int minSize;
 	private double kurtosis;
 	private boolean do2dGaussfit;
+//	private boolean do2dGaussfitbyLMA;
 
 	public static class Builder {
 		// essential parameters
-		private final int roiSize;
+		private final int roiSizex,roiSizey;
 		private boolean do2dGaussfit;
+//		private boolean do2dGaussfitbyLMA;
 		// option parameters; initialize as default
 		private int IterationNumber = 1000;
 		private double nearstRange = 0.5D; // the distance range to recognize the particle as same particle.
@@ -102,9 +127,19 @@ public class PtaParam implements Serializable{
 		private int minSize = 5;
 		private double kurtosis = -0.1D;
 		
-		public Builder(int roiSize, boolean do2dGaussfit) {
-			this.roiSize = roiSize;
+//		public Builder(int roiSize, boolean do2dGaussfit, boolean do2dGaussfitbyLMA) {
+//			this.roiSizex = this.roiSizey = roiSize;
+//			this.do2dGaussfit = do2dGaussfit;
+//			this.do2dGaussfitbyLMA = do2dGaussfitbyLMA;
+//		}
+		
+//		public Builder(int roiSizex,int roiSizey, boolean do2dGaussfit, boolean do2dGaussfitbyLMA) {
+		public Builder(int roiSizex,int roiSizey, boolean do2dGaussfit) {
+
+			this.roiSizex = roiSizex;
+			this.roiSizey = roiSizey;
 			this.do2dGaussfit = do2dGaussfit;
+//			this.do2dGaussfitbyLMA = do2dGaussfitbyLMA;		
 		}
 		
 		public Builder IterationNumber(int val) {IterationNumber = val>0?val:1000;return this;}
@@ -123,13 +158,15 @@ public class PtaParam implements Serializable{
 	private PtaParam(Builder builder) {
 		IterationNumber = builder.IterationNumber;
 		nearstRange = builder.nearstRange;
-		roiSize = builder.roiSize;
+		roiSizex = builder.roiSizex;
+		roiSizey = builder.roiSizey;
 		linkageFrame = builder.linkageFrame;
 		searchPointIncrement = builder.searchPointIncrement;
 		minIntensity = builder.minIntensity;
 		minSize = builder.minSize;
 		kurtosis = builder.kurtosis;
-		do2dGaussfit = builder.do2dGaussfit;		
+		do2dGaussfit = builder.do2dGaussfit;
+//		do2dGaussfitbyLMA = builder.do2dGaussfitbyLMA;
 	}
 
 	@Override
@@ -137,26 +174,30 @@ public class PtaParam implements Serializable{
 		StringBuilder sb = new StringBuilder();
 		sb.append("IterationNumber:"+this.IterationNumber+"\n");
 		sb.append("nearstRange:"+this.nearstRange+"\n");
-		sb.append("roiSize:"+this.roiSize+"\n");
+		sb.append("roiSize-x:"+this.roiSizex+"\n");
+		sb.append("roiSize-y:"+this.roiSizey+"\n");
 		sb.append("linkageFrame:"+this.linkageFrame+"\n");
 		sb.append("searchPoint:"+this.searchPointIncrement+"\n");
 		sb.append("minIntensity:"+this.minIntensity+"\n");
 		sb.append("minSize:"+this.minSize+"\n");
 		sb.append("kurtosis:"+this.kurtosis+"\n");
 		sb.append("do2DGauss:"+this.do2dGaussfit+"\n");
+//		sb.append("do2DGaussByLMA:"+this.do2dGaussfitbyLMA+"\n");
 		return sb.toString();
 	}
 	
 	public double[] retParamAsArray() {
-		double[] retParam = new double[8];
+		double[] retParam = new double[9];
 		retParam[0] = this.IterationNumber;
 		retParam[1] = this.nearstRange;
-		retParam[2] = this.roiSize;
-		retParam[3] = this.linkageFrame;
-		retParam[4] = this.searchPointIncrement;
-		retParam[5] = this.minIntensity;
-		retParam[6] = this.kurtosis;
-		retParam[7] = this.do2dGaussfit?1:0;
+		retParam[2] = this.roiSizex;
+		retParam[3] = this.roiSizey;
+		retParam[4] = this.linkageFrame;
+		retParam[5] = this.searchPointIncrement;
+		retParam[6] = this.minIntensity;
+		retParam[7] = this.kurtosis;
+		retParam[8] = this.do2dGaussfit?1:0;
+//		retParam[9] = this.do2dGaussfitbyLMA?1:0;
 		return retParam;
 	}
 }

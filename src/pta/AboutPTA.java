@@ -5,11 +5,10 @@ import ij.gui.*;
 
 public class AboutPTA implements PlugIn {
 
-	@Override
 	public void run(String arg0) {
 		// TODO Auto-generated method stub
 		String title = "About...";
-		String message = "Particle Track and Analysis (PTA) Version 1.1\n" +
+		String message = "Particle Track and Analysis (PTA) Version 1.2\n" +
 				"developed by Yoshiyuki Arai, " +
 				"Lab. for Nanosystems Physiology Research Institute for Electronic Science Hokkaido University\n" +
 				"I kindly request that you include a acknowledement whenever presenting or publishing results based on PTA.\n" +

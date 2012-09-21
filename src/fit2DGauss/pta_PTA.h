@@ -12,10 +12,10 @@ extern "C" {
 /*
  * Class:     pta_PTA
  * Method:    fit2DGauss
- * Signature: ([D[DI[I)[D
+ * Signature: ([D[DII[I)[D
  */
 JNIEXPORT jdoubleArray JNICALL Java_pta_PTA_fit2DGauss
-  (JNIEnv *, jclass, jdoubleArray, jdoubleArray, jint, jintArray);
+  (JNIEnv *, jclass, jdoubleArray, jdoubleArray, jint, jint, jintArray);
 
 #ifdef __cplusplus
 }

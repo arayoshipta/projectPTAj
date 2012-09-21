@@ -1,11 +1,15 @@
 package pta.track;
 
+//import jaolho.data.lma.LMA;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.JOptionPane;
+
+//import ZS.Solve.LMfunc;
+//import ZS.Solve.LM;
 
 import pta.*;
 import pta.data.*;
@@ -86,8 +90,8 @@ public class DetectParticle extends Thread implements Measurements{
 	public void setScanRoi(Roi scanRoi) {
 		if(scanRoi == null) scanRoi = new Roi(0,0,imp.getWidth(),imp.getHeight());
 		this.scanRoi = scanRoi;
-		wx=scanRoi.getBounds().x+scanRoi.getBounds().width-ptap.getRoiSize();
-		wy=scanRoi.getBounds().y+scanRoi.getBounds().height-ptap.getRoiSize();
+		wx=scanRoi.getBounds().x+scanRoi.getBounds().width-ptap.getRoiSizex();
+		wy=scanRoi.getBounds().y+scanRoi.getBounds().height-ptap.getRoiSizey();
 	}
 
 	public void setStackRange(int startSlice,int endSlice) {
@@ -105,18 +109,18 @@ public class DetectParticle extends Thread implements Measurements{
 		imp.setSlice(slice);
 		ImageProcessor ip = ims.getProcessor(slice);
 		FloatProcessor fip = (FloatProcessor) ip.convertToFloat();
-
+//		long start = System.currentTimeMillis();
 		scan:
 			for(int i=scanRoi.getBounds().x;i<wx;i+=ptap.getSearchPointIncrement()) {
 				for(int j=scanRoi.getBounds().y;j<wy;j+=ptap.getSearchPointIncrement()) {
 
 					if(this.isInterrupted()) 
 						break scan;
-					double fval=Float.intBitsToFloat(fip.getPixel(i+ptap.getRoiSize()/2, j+ptap.getRoiSize()/2));
-					if (fval>=lt && fval<=ht && mask[i+ptap.getRoiSize()/2+(j+ptap.getRoiSize()/2)*imp.getWidth()]==0) {
+					double fval=Float.intBitsToFloat(fip.getPixel(i+ptap.getRoiSizex()/2, j+ptap.getRoiSizey()/2));
+					if (fval>=lt && fval<=ht && mask[i+ptap.getRoiSizex()/2+(j+ptap.getRoiSizey()/2)*imp.getWidth()]==0) {
 						Wand wand = new Wand(fip);
-						double wdx = (int)i+(double)ptap.getRoiSize()/2.0D;
-						double wdy = (int)j+(double)ptap.getRoiSize()/2.0D;
+						double wdx = (int)i+(double)ptap.getRoiSizex()/2.0D;
+						double wdy = (int)j+(double)ptap.getRoiSizey()/2.0D;
 						wand.autoOutline((int)wdx, (int)wdy, lt, ht);
 						Roi wandRoi = new PolygonRoi(wand.xpoints,wand.ypoints,wand.npoints,Roi.POLYGON);
 
@@ -130,8 +134,8 @@ public class DetectParticle extends Thread implements Measurements{
 							continue;
 						}
 
-						double xx = is.xCentroid-cal.pixelWidth*(double)ptap.getRoiSize()/2.0D;
-						double yy = is.yCentroid-cal.pixelHeight*(double)ptap.getRoiSize()/2.0D;
+						double xx = is.xCentroid-cal.pixelWidth*(double)ptap.getRoiSizex()/2.0D;
+						double yy = is.yCentroid-cal.pixelHeight*(double)ptap.getRoiSizey()/2.0D;
 						int ixx = (int)(xx/cal.pixelWidth);
 						int iyy = (int)(yy/cal.pixelHeight);
 
@@ -140,17 +144,25 @@ public class DetectParticle extends Thread implements Measurements{
 						param[3] = is.xCentroid;
 						param[4] = is.yCentroid;						
 
-						double[] fionaData = new double[ptap.getRoiSize()*ptap.getRoiSize()];
+						double[] fionaData = new double[ptap.getRoiSizex()*ptap.getRoiSizey()];
 						int[] info = new int[2];
 						float[] pixVal = (float[])fip.getPixels();
 						double roiInt = 0;
 						double intInt = 0;
 
 						// extract Roi data and cast to double
-						for(int ii=0;ii<ptap.getRoiSize()*ptap.getRoiSize();ii++) {
-							int ix=ii%ptap.getRoiSize(),iy=ii/ptap.getRoiSize();
+						for(int ii=0;ii<ptap.getRoiSizex()*ptap.getRoiSizey();ii++) {
+							// x position is mod (count (ii), y number )
+							// y position is count / x size number
+							int ix=ii%ptap.getRoiSizex(),iy=ii/ptap.getRoiSizex();
 							double tmpval = (double)pixVal[ixx+ix+(iyy+iy)*imp.getWidth()];
-							fionaData[ix+iy*ptap.getRoiSize()] = tmpval;
+							try {
+							fionaData[ix+iy*ptap.getRoiSizex()] = tmpval;
+							} catch (Exception E) {
+								IJ.log("sizex="+ptap.getRoiSizex()+", sizey="+ptap.getRoiSizey());
+								IJ.log("ii:"+ii+"ix:"+ix+" iy:"+iy);
+								IJ.log(E.toString());
+							}
 							roiInt += tmpval;
 							if(wandRoi.contains((ixx+ix),(iyy+iy))) {
 								mask[ixx+ix+(iyy+iy)*imp.getWidth()]=(byte)255;
@@ -158,51 +170,92 @@ public class DetectParticle extends Thread implements Measurements{
 							}
 						}
 						param[0] = roiInt;
-						
-						Roi tmpRoi =new Roi((int)(xx/cal.pixelWidth),(int)(yy/cal.pixelHeight),ptap.getRoiSize(),ptap.getRoiSize());
+
+						Roi tmpRoi =new Roi((int)(xx/cal.pixelWidth),(int)(yy/cal.pixelHeight),ptap.getRoiSizex(),ptap.getRoiSizey());
 						imp.setRoi(tmpRoi);
 						if(PTA.isDebug()) IJ.log(tmpRoi.toString());
 						is=imp.getStatistics(CENTER_OF_MASS+MIN_MAX+AREA);
 						// estimate parameter
-//						param[0] = is.max; // amplitude
+						//						param[0] = is.max; // amplitude
 						param[5] = is.min; // offset
-						param[1] = (double)ptap.getRoiSize()/10.0d*cal.pixelWidth; // sigma x
-						param[2] = (double)ptap.getRoiSize()/10.0d*cal.pixelHeight; // sigma y
+						param[1] = (double)ptap.getRoiSizex()/10.0d*cal.pixelWidth; // sigma x
+						param[2] = (double)ptap.getRoiSizey()/10.0d*cal.pixelHeight; // sigma y
 						// Disable center of Mass method H22.12.04
-//						if(!PTA_.getDetectMethod()) {
-//							param[3] = is.xCenterOfMass; // mu x
-//							param[4] = is.yCenterOfMass; // mu y
-//						}
-						if(PTA.isDebug())
+						//						if(!PTA_.getDetectMethod()) {
+						//							param[3] = is.xCenterOfMass; // mu x
+						//							param[4] = is.yCenterOfMass; // mu y
+						//						}
+						if(PTA.isDebug()) 
 							IJ.log("param:"+Arrays.toString(param));
 						// fit 2DGauss
 						info[1] = ptap.getIterationNumber(); //iteration limit number
 						boolean fit = false;
-						double dsize = ptap.getRoiSize()%2==0?ptap.getRoiSize()/2:(ptap.getRoiSize()+1)/2;
+//						double dsize = ptap.getRoiSize()%2==0?ptap.getRoiSize()/2:(ptap.getRoiSize()+1)/2;
+						double dsizex = ptap.getRoiSizex()%2==0?ptap.getRoiSizex()/2:(ptap.getRoiSizex()+1)/2;
+						double dsizey = ptap.getRoiSizey()%2==0?ptap.getRoiSizey()/2:(ptap.getRoiSizey()+1)/2;
 						if((param[3]-xx)>0 
-								&& (param[3]-xx)<ptap.getRoiSize()
+								&& (param[3]-xx)<ptap.getRoiSizex()
 								&& (param[4]-yy)>0
-								&& (param[4]-yy)<ptap.getRoiSize()
+								&& (param[4]-yy)<ptap.getRoiSizey()
 								&& is.kurtosis>ptap.getKurtosis()){
 							if (ptap.isDo2dGaussfit()) {
 								param[1] /= cal.pixelWidth;
 								param[2] /= cal.pixelHeight;
-								param[3] = param[4] = (double)ptap.getRoiSize()/2.0D;
-								param = PTA.fit2DGauss(fionaData,param,ptap.getRoiSize(),info); //DO 2d gaussian Fitting!!
+								param[3] = (double)ptap.getRoiSizex()/2.0D;
+								param[4] = (double)ptap.getRoiSizey()/2.0D;
+								param = PTA.fit2DGauss(fionaData,param,ptap.getRoiSizex(),ptap.getRoiSizey(),info); //DO 2d gaussian Fitting!!
 								param[3] *= cal.pixelWidth; // to translate pixel data to unit data
 								param[4] *= cal.pixelHeight;
 								param[3] += (double)ixx*cal.pixelWidth;
 								param[4] += (double)iyy*cal.pixelHeight;
 								param[1] *= cal.pixelWidth;
 								param[2] *= cal.pixelHeight;
-							} else {
+//							} else if (ptap.isDo2dGaussfitbyLMA()) { //---from--- test for LMA with JAMA
+//
+//									param[1] /= cal.pixelWidth;
+//									param[2] /= cal.pixelHeight;
+//									param[3] = (double)ptap.getRoiSizex()/2.0D;
+//									param[4] = (double)ptap.getRoiSizey()/2.0D;
+//			// --from-- test by LM
+//									LMfunc f = new LM2DGauss();
+//									double[] s = new double[ptap.getRoiSizex()*ptap.getRoiSizey()];
+//									double[][] lmx = new double[ptap.getRoiSizex()*ptap.getRoiSizey()][2];
+//									int kkkindex=0;
+//									for(int jjjj=0;jjjj<ptap.getRoiSizex();jjjj++)
+//										for(int iiii=0;iiii<ptap.getRoiSizey();iiii++) {
+//										lmx[kkkindex][0]=iiii;
+//										lmx[kkkindex][1]=jjjj;
+//										kkkindex++;
+//										}
+//									for(int kkk=0;kkk<ptap.getRoiSizex()*ptap.getRoiSizey();kkk++)
+//										s[kkk]=0.1;
+//									boolean[] vary = new boolean[param.length];
+//									for( int jjj = 0; jjj < param.length; jjj++ ) vary[jjj] = true;
+//									try {
+//										LM.solve(lmx, param, fionaData, s, vary, f, 0.001, 0.01, 1000, 0);
+//									} catch (Exception e) {
+//										// TODO Auto-generated catch block
+//										IJ.log(e.toString());
+//									}
+//									info[0]=1;
+//			// --- to ---
+//							
+//									param[3] *= cal.pixelWidth; // to translate pixel data to unit data
+//									param[4] *= cal.pixelHeight;
+//									param[3] += (double)ixx*cal.pixelWidth;
+//									param[4] += (double)iyy*cal.pixelHeight;
+//									param[1] *= cal.pixelWidth;
+//									param[2] *= cal.pixelHeight;
+
+								} else {
+								//---to---
 								param[0] = intInt;
 								info[0] = 1;
 							}
 							fit = true;
 							if(PTA.isDebug()) {
 								IJ.log("param:"+Arrays.toString(param));
-								Roi debroi = new Roi(ixx,iyy,(int)dsize*2,(int)dsize*2);
+								Roi debroi = new Roi(ixx,iyy,(int)dsizex*2,(int)dsizey*2);
 								debroi.setStrokeColor(Color.magenta);
 								ol.add(debroi);
 								imp.setOverlay(ol);
@@ -213,10 +266,10 @@ public class DetectParticle extends Thread implements Measurements{
 								&& fit
 								&& param[0]>ptap.getMinIntensity()
 								&& param[1]>0 && param[2]>0		
-								&& param[1]<=(double)ptap.getRoiSize()*cal.pixelWidth && param[2]<=(double)ptap.getRoiSize()*cal.pixelHeight
-								&& (param[3]-xx)<(double)ptap.getRoiSize()*cal.pixelWidth && (param[3]-xx)>0
-								&& (param[4]-yy)<(double)ptap.getRoiSize()*cal.pixelHeight && (param[4]-yy)>0
-						) 
+								&& param[1]<=(double)ptap.getRoiSizex()*cal.pixelWidth && param[2]<=(double)ptap.getRoiSizey()*cal.pixelHeight
+								&& (param[3]-xx)<(double)ptap.getRoiSizex()*cal.pixelWidth && (param[3]-xx)>0
+								&& (param[4]-yy)<(double)ptap.getRoiSizey()*cal.pixelHeight && (param[4]-yy)>0
+								) 
 						{
 							FPoint detP = new FPoint(ixx,iyy,param,roiInt,info,ptap.getRoiSize(),Color.cyan,slice,cal);
 							dplist.add(detP);
@@ -230,28 +283,30 @@ public class DetectParticle extends Thread implements Measurements{
 								msg.append(":fit=false");
 							if(param[0]<ptap.getMinIntensity())
 								msg.append(":param[0]="+param[0]);
-							if(param[1]<0 || param[1]>=ptap.getRoiSize()/2)
+							if(param[1]<0 || param[1]>=ptap.getRoiSizex()/2)
 								msg.append(":param[1]="+param[1]);
-							if(param[2]<0 || param[2]>=ptap.getRoiSize()/2)
+							if(param[2]<0 || param[2]>=ptap.getRoiSizey()/2)
 								msg.append(":param[2]="+param[2]);
-							if((param[3]-ixx)<=0 || (param[3]-ixx)>ptap.getRoiSize())
+							if((param[3]-ixx)<=0 || (param[3]-ixx)>ptap.getRoiSizex())
 								msg.append(":param[3]="+param[3]);
-							if((param[4]-iyy)<=0 || (param[4]-iyy)>ptap.getRoiSize())
+							if((param[4]-iyy)<=0 || (param[4]-iyy)>ptap.getRoiSizey())
 								msg.append(":param[4]="+param[4]);
 							if(PTA.isDebug())
 								IJ.log(msg.toString());
 						}
 					}
-
 				}
 			}
 		imp.setRoi(scanRoi);
 		imp.setOverlay(null);
 		ol.clear();
 		// only show the dplist removed duplication
-		for(Roi r:FPoint.retRoiset(FPoint.findDuplication(dplist, ptap.getNearstRange()*ptap.getRoiSize()*cal.pixelDepth), Color.cyan))
+		// criteria is determined by small x or y size 
+		for(Roi r:FPoint.retRoiset(FPoint.findDuplication(dplist, ptap.getNearstRange()*(ptap.getRoiSizex()>ptap.getRoiSizey()?ptap.getRoiSizex():ptap.getRoiSizey())/2*cal.pixelDepth), Color.cyan))
 			ol.add(r);
 		imp.setOverlay(ol);
+//		long end = System.currentTimeMillis();
+//		IJ.log("Time: "+(end-start)+" ms."+" Particles: "+dplist.size());
 		return dplist;
 	}
 
