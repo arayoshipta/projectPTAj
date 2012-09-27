@@ -19,7 +19,7 @@ How to use this plugin?
 
     1.  Check your platform. For MacOSX10.7 (or higher) and Windows (32bit, 64bit) platforms are available.
     2.	Put jar files in /jar folder (PTA_.jar, jcommon.jar, jfreechart.jar) to your ImageJ/plugins folder
-    3.	Put fit2DGauss.dll (for Win) or libfit2DGauss.jnilib (for MacOSX) in lib folder to your ImageJ older (not plugins folder).
+    3.	Put fit2DGauss.dll (for Win) or libfit2DGauss.jnilib (for MacOSX) in lib folder to your ImageJ folder (not plugins folder).
 
 Good luck!
 
