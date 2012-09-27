@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="projectPTA" default="" basedir=".">
+    <description>emblTools build file</description>
+	<property name="src" location="src" />
+	<property name="build" location="jar" />
+	<property name="dist"  location="dist" />
+
+	<property name="pluginsDir"  location="${basedir}/../imagej/plugins/" />	
+	<property name="fijipluginsDir"  location="/Applications/Fiji.app/plugins/" />	
+	
+ 	<property name="jarname" value="PTA_.jar" />
+	<property name="user.name" value="Kota Miura" />
+	
+	<target name="main" depends="compress" description="Main target">
+		<echo>
+			Building the .jar file.
+		</echo>
+	</target>
+	<target name="compress" depends="" description="generate the distribution">
+		<jar jarfile="${jarname}">
+			<fileset dir="." includes="plugins.config" />
+			<fileset dir="${build}" includes="**/*.*" >
+			</fileset>
+			<manifest>
+				<attribute name="Built-By" value="${user.name}"/>
+			</manifest>
+		</jar>
+		<copy file="${jarname}" toDir="${pluginsDir}" />
+			<echo>
+	 			Copied to ${ws1pluginsDir}
+	 		</echo>
+		<copy file="${jarname}" toDir="${fijipluginsDir}" />
+ 		<echo>
+ 			Copied to ${fijipluginsDir}
+ 		</echo>	 		
+	</target>
+</project>
