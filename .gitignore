@@ -8,3 +8,4 @@ target/classes/*
 target/generated-sources/*
 target/PTA_-1.0.0.jar
 target/*
+.settings/*
