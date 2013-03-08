@@ -1,0 +1,8 @@
+.DS_Store
+.classpath
+.externalToolBuilders/*
+bin/
+.project
+PTA_.jar
+target/classes/*
+target/generated-sources/*
