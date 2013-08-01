@@ -11,6 +11,7 @@ import javax.swing.JOptionPane;
 //import ZS.Solve.LMfunc;
 //import ZS.Solve.LM;
 
+
 import pta.*;
 import pta.data.*;
 import pta.gui.ShowPdata;
@@ -37,12 +38,13 @@ public class DetectParticle extends Thread implements Measurements{
 	private boolean multiFrames = false;
 	private boolean isDetection = false;
 	private boolean noGUI = false;
+	private List<List<FPoint>> linkedPointList;
 
 	/*
 	 * Constructor for multiple frames. this can return alldplist
 	 */
 	public DetectParticle(PtaParam ptap,ImagePlus imp,Roi scanRoi,
-			ShowPdata pData) 
+			ShowPdata pData, boolean nogui) 
 	{
 		this.imp = imp;
 		this.dplist = null;
@@ -50,6 +52,7 @@ public class DetectParticle extends Thread implements Measurements{
 		this.multiFrames = true;
 		this.ims = imp.getImageStack();
 		this.cal = imp.getCalibration();
+		this.noGUI = nogui;
 		setPtap(ptap);
 		setScanRoi(scanRoi);
 		init();
@@ -59,7 +62,7 @@ public class DetectParticle extends Thread implements Measurements{
 	 * Constructor for multiple frames. this can return alldplist
 	 * no GUI version
 	 */
-	public DetectParticle(PtaParam ptap,ImagePlus imp,Roi scanRoi) 
+	public DetectParticle(PtaParam ptap,ImagePlus imp,Roi scanRoi, boolean nogui) 
 	{
 		this.imp = imp;
 		this.dplist = null;
@@ -67,9 +70,9 @@ public class DetectParticle extends Thread implements Measurements{
 		this.multiFrames = true;
 		this.ims = imp.getImageStack();
 		this.cal = imp.getCalibration();
+		this.noGUI = nogui;
 		setPtap(ptap);
 		setScanRoi(scanRoi);
-		setNoGUI();
 		init();
 	}
 	
@@ -359,8 +362,7 @@ public class DetectParticle extends Thread implements Measurements{
 	public void run() {
 		int slice = startSlice;
 		IJ.resetEscape();
-		IJ.log("in the thread");
-		IJ.log("slice" + slice);
+		IJ.log("Detecting points...");
 		if(multiFrames) {
 			IJ.log("multiframes");
 			do{
@@ -371,10 +373,10 @@ public class DetectParticle extends Thread implements Measurements{
 					if(ret == 0)
 						break;
 				}
-				IJ.log("slice" + slice);
+				//IJ.log("slice" + slice);
 				alldplist.add(slice-1, new ArrayList<FPoint>(dpOneSlice(slice)));
 				slice++;
-				IJ.log("list size"+alldplist.size());
+				//IJ.log("list size"+alldplist.size());
 			} while (slice<=endSlice);
 			PTA.setDetectionState(false);
 			processPData();
@@ -391,8 +393,8 @@ public class DetectParticle extends Thread implements Measurements{
 	public void processPData() {
 		Overlay pathOverlay = new Overlay();
 		new FindLinkage(alldplist,ptap,imp).run();
-		pData = new ShowPdata(new MakePointList(alldplist,pathOverlay,2).run()
-				,imp,ptap);
+		linkedPointList = new MakePointList(alldplist,pathOverlay,2).run();
+		pData = new ShowPdata(linkedPointList, imp, ptap, noGUI);
 		imp.setOverlay(pathOverlay);
 	}
 
@@ -409,5 +411,9 @@ public class DetectParticle extends Thread implements Measurements{
 	
 	public List<List<FPoint>> getalldplist(){
 		return alldplist;
+	}
+
+	public List<List<FPoint>> getLinkedPointList() {
+		return linkedPointList;
 	}
 }

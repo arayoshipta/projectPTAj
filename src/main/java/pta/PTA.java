@@ -139,7 +139,13 @@ public class PTA extends PlugInFrame{
 		if (IJ.versionLessThan("1.43g"))
 			return;
 		if (frame != null){
-			IJ.error("PTA is already implemented");
+			if (!noGUI){ 
+				setVisible(true);
+				WindowManager.addWindow(this);
+				IJ.error("PTA is already implemented");
+			} else {
+				IJ.log("No GUI, but using already existing instance.");
+			}
 			return;
 		}
 		frame = this;
@@ -398,7 +404,8 @@ public class PTA extends PlugInFrame{
 				Roi tmpAreaRoi = imp.getRoi();
 				if(tmpAreaRoi != null && tmpAreaRoi.getType() == Roi.RECTANGLE)
 					scanAreaRoi =imp.getRoi();
-				dp = new DetectParticle(ptap,imp,scanAreaRoi,pData);
+				// detect particle with GUI
+				dp = new DetectParticle(ptap,imp,scanAreaRoi,pData, false);
 				ptap.setDo2dGaussfit(j2DGaussCheckbox.isSelected());
 				// test by LMA with JAMA
 //				ptap.setDo2dGaussfitbyLMA(jLmaCheckbox.isSelected());

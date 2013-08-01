@@ -65,7 +65,7 @@ public class ShowPdata extends JFrame{
 	 * constructor
 	 */	
 
-	public ShowPdata(List<List<FPoint>> pointlist, ImagePlus imp,PtaParam ptap) {
+	public ShowPdata(List<List<FPoint>> pointlist, ImagePlus imp,PtaParam ptap, boolean nogui) {
 		this.pointlist = pointlist;
 		this.imp = imp;
 		this.cal = imp.getCalibration();
@@ -76,7 +76,8 @@ public class ShowPdata extends JFrame{
 		setTableObjectData(pointlist);
 		sda = new saveDataAction();
 
-		new makeTableFrame(this);
+		if (!nogui) 
+			new makeTableFrame(this);
 		PTA.setSelectedList(pointlist, selectedList);
 		PTA.setAnalyzedImp(imp);
 		//		IJ.log("pData constructed");
