@@ -36,6 +36,7 @@ public class DetectParticle extends Thread implements Measurements{
 	private ShowPdata pData;
 	private boolean multiFrames = false;
 	private boolean isDetection = false;
+	private boolean noGUI = false;
 
 	/*
 	 * Constructor for multiple frames. this can return alldplist
@@ -53,6 +54,25 @@ public class DetectParticle extends Thread implements Measurements{
 		setScanRoi(scanRoi);
 		init();
 	}
+
+	/*
+	 * Constructor for multiple frames. this can return alldplist
+	 * no GUI version
+	 */
+	public DetectParticle(PtaParam ptap,ImagePlus imp,Roi scanRoi) 
+	{
+		this.imp = imp;
+		this.dplist = null;
+		//this.pData = pData;
+		this.multiFrames = true;
+		this.ims = imp.getImageStack();
+		this.cal = imp.getCalibration();
+		setPtap(ptap);
+		setScanRoi(scanRoi);
+		setNoGUI();
+		init();
+	}
+	
 	/*
 	 * Constructor for single frames. This can return dplist
 	 */
@@ -72,6 +92,30 @@ public class DetectParticle extends Thread implements Measurements{
 		init();
 	}
 
+	/**
+	 * no GUI version of above.
+	 * @param ptap
+	 * @param imp
+	 * @param scanRoi
+	 * @param dplist
+	 * @param isDetection
+	 */
+	public DetectParticle(PtaParam ptap,ImagePlus imp,Roi scanRoi,
+			List<FPoint> dplist,boolean isDetection) {
+		this.imp = imp;
+		this.ims = imp.getImageStack();
+		this.cal = imp.getCalibration();
+		this.dplist = dplist;
+		this.isDetection = isDetection;
+		this.startSlice = imp.getCurrentSlice();
+		this.multiFrames = false;
+
+		setPtap(ptap);
+		setScanRoi(scanRoi);
+		setNoGUI();
+		init();
+	}	
+	
 	private void init() {
 		ImageProcessor ip = imp.getProcessor();
 		lt=Math.round(ip.getMinThreshold());
@@ -79,8 +123,10 @@ public class DetectParticle extends Thread implements Measurements{
 			ht=Math.round(ip.getMaxThreshold());
 		else
 			ht=65535;
-		if(PTA.isDebug())
-			IJ.log(cal.toString());
+		if (!this.noGUI){
+			if(PTA.isDebug())
+				IJ.log(cal.toString());
+		}
 	}
 
 	public void setPtap(PtaParam ptap) {
@@ -313,7 +359,10 @@ public class DetectParticle extends Thread implements Measurements{
 	public void run() {
 		int slice = startSlice;
 		IJ.resetEscape();
+		IJ.log("in the thread");
+		IJ.log("slice" + slice);
 		if(multiFrames) {
+			IJ.log("multiframes");
 			do{
 				if(IJ.escapePressed()) {
 					IJ.resetEscape();
@@ -322,8 +371,10 @@ public class DetectParticle extends Thread implements Measurements{
 					if(ret == 0)
 						break;
 				}
+				IJ.log("slice" + slice);
 				alldplist.add(slice-1, new ArrayList<FPoint>(dpOneSlice(slice)));
 				slice++;
+				IJ.log("list size"+alldplist.size());
 			} while (slice<=endSlice);
 			PTA.setDetectionState(false);
 			processPData();
@@ -347,5 +398,16 @@ public class DetectParticle extends Thread implements Measurements{
 
 	public Roi getScanRoi() {
 		return scanRoi;
+	}
+	
+	public void setNoGUI(){
+		noGUI = true;
+	}
+	public ShowPdata getShowPdata(){
+		return this.pData;
+	}
+	
+	public List<List<FPoint>> getalldplist(){
+		return alldplist;
 	}
 }

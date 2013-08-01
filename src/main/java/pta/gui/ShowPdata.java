@@ -377,7 +377,7 @@ public class ShowPdata extends JFrame{
 			statMenu.add(statSelected);
 			statMenu.add(statSD);
 
-
+			
 			frame.setVisible(true);
 			frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 			WindowManager.addWindow((Frame)frame);

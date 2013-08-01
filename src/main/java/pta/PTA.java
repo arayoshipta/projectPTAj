@@ -128,6 +128,10 @@ public class PTA extends PlugInFrame{
 	private JButton jSaveParamButton;
 	private JPanel jShowPathPanel;
 	private JPanel jShowRoiPanel;
+	
+	private static boolean noGUI = false;
+	private static boolean debugflag = false; 
+	
 	// End of variables declaration
 	public PTA() {
 		super("PTA");
@@ -158,8 +162,10 @@ public class PTA extends PlugInFrame{
 		}
 		initComponents();
 		GUI.center(this);
-		setVisible(true);
-		WindowManager.addWindow(this);
+		if (!noGUI){
+			setVisible(true);
+			WindowManager.addWindow(this);
+		}
 		ImagePlus.addImageListener(listener);
 	}
 	private void initComponents() {
@@ -824,7 +830,10 @@ public class PTA extends PlugInFrame{
 	}
 
 	public static boolean isDebug() {
-		return jDebugCheckbox.isSelected();
+		if (noGUI)
+			return debugflag;
+		else
+			return jDebugCheckbox.isSelected();
 	}
 
 	public static void setPdata(ImagePlus img,ShowPdata data) {
@@ -846,6 +855,7 @@ public class PTA extends PlugInFrame{
 	}
 	
 	public static boolean isBgSub() {
+		
 		return jSubBgCheckBox.isSelected();
 	}
 	
@@ -855,5 +865,16 @@ public class PTA extends PlugInFrame{
 	
 	public static boolean isRoiInt() {
 		return jRadioROIButton.isSelected();
+	}
+	
+	public static void setDebugMode(){
+		debugflag = true;
+	}
+	
+	public static void setNoGUI(boolean nogui){
+		noGUI = nogui; 
+	}
+	public DetectParticle getDetectParticle(){
+		return this.dp;
 	}
 }
