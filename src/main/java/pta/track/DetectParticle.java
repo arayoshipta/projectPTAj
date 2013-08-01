@@ -397,6 +397,47 @@ public class DetectParticle extends Thread implements Measurements{
 		pData = new ShowPdata(linkedPointList, imp, ptap, noGUI);
 		imp.setOverlay(pathOverlay);
 	}
+	
+	/**
+	 * For getting MSD from scripts
+	 * @param leastlenTime
+	 * @param isLinear
+	 * @return an arraylist of MSDdata objects, each for a track
+	 */
+	public ArrayList<MSDdata> getMSDres(double leastlenTime, boolean isLinear){
+		if ( pData == null ){
+			IJ.log("ShowPdata object is null");
+			return null;
+		}
+		if (linkedPointList == null){
+			IJ.log("point list is null");
+			return null;
+		}
+		List<List<FPoint>> pointlist = linkedPointList;
+		int[] selectedList = new int[pointlist.size()];
+		for(int i=0;i<pointlist.size();i++) selectedList[i]=i;
+		
+		//@TODO there could be some filter here. 
+		
+		return pData.doMSDanalysis(linkedPointList, selectedList, leastlenTime, isLinear);
+	}
+
+	/**
+	 * For getting MSD from scripts
+	 * @param selectedList
+	 * @param leastlenTime
+	 * @param isLinear
+	 * @return an arraylist of MSDdata objects, each for a track
+	 */
+	public ArrayList<MSDdata> getMSDres(int[] selectedList, double leastlenTime, boolean isLinear){
+		if ( pData == null )
+			return null;
+		if (linkedPointList == null)
+			return null;
+		
+		//@TODO there could be some filter here. 		
+		return pData.doMSDanalysis(linkedPointList, selectedList, leastlenTime, isLinear);
+	}	
 
 	public Roi getScanRoi() {
 		return scanRoi;

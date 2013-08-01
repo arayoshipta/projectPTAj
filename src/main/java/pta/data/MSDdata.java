@@ -1,6 +1,7 @@
 package pta.data;
 
 public class MSDdata {
+	int id;
 	double[] fullDFrames;
 	double[] fullMSD;
 	double a;
@@ -17,8 +18,9 @@ public class MSDdata {
 	 * @param c
 	 * @param fittype
 	 */
-	public MSDdata(double[] fullDFrames, double[] fullMSD, double a, double b, double r) {
+	public MSDdata(int id, double[] fullDFrames, double[] fullMSD, double a, double b, double r) {
 		super();
+		this.id = id;
 		this.fullDFrames = fullDFrames;
 		this.fullMSD = fullMSD;
 		this.a = a;
@@ -35,9 +37,10 @@ public class MSDdata {
 	 * @param c
 	 * @param fittype
 	 */
-	public MSDdata(double[] fullDFrames, double[] fullMSD, double a, double b,
+	public MSDdata(int id, double[] fullDFrames, double[] fullMSD, double a, double b,
 			double c,  double r) {
 		super();
+		this.id = id;
 		this.fullDFrames = fullDFrames;
 		this.fullMSD = fullMSD;
 		this.a = a;
@@ -46,6 +49,9 @@ public class MSDdata {
 		this.r = r;
 		this.fittype = "Poly2";
 	}
+	public double getID() {
+		return id;
+	}	
 	public double[] getFullDFrames() {
 		return fullDFrames;
 	}
@@ -65,6 +71,9 @@ public class MSDdata {
 	public double getC() {
 		return c;
 	}
+	public double getR() {
+		return r;
+	}	
 
 	public String getFittype() {
 		return fittype;

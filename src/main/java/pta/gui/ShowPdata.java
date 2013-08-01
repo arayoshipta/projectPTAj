@@ -564,14 +564,12 @@ public class ShowPdata extends JFrame{
 			if(b.getText() == "calc MSD") {
 				GenericDialog gd = new GenericDialog("Calculate MSD");
 				gd.addNumericField("delta "+cal.getTimeUnit()+" length for MSD calc", 5, 0);
-
 				gd.addCheckbox("Linear(true) or Poly2(false)", true);
 				gd.showDialog();
 				if(gd.wasCanceled()) return;
 				double leastlenTime = (double)gd.getNextNumber();
 				boolean isLinear =gd.getNextBoolean();
-				int leastlen = (int)(leastlenTime/cal.frameInterval);
-				leastlen = leastlen<=3?3:leastlen;
+				ArrayList<MSDdata> reslist = doMSDanalysis(pointlist, selectedList, leastlenTime, isLinear);
 				String lp;
 				if (isLinear)
 					lp = "Linear";
@@ -588,30 +586,22 @@ public class ShowPdata extends JFrame{
 						IJ.log("y=a+bx+cx^2");
 						IJ.log("a b c R^2");
 					}
-					for(int index:selectedList) {
-						if(pointlist.get(index).size()<leastlen) continue; // if the length of pointlist is less than leastlen, skip it.
-
-						CalcMSD cm = new CalcMSD(pointlist.get(index),leastlen,cal);
+					for(MSDdata res:reslist) {
 						StringBuilder sb = new StringBuilder();
 						sb.append("Point");
-						sb.append(index);
+						sb.append(res.getID());
 						sb.append(": ");
-						for(double msd:cm.getMsdList()) {
+						for(double msd:res.getFullMSD()) {
 							sb.append(msd);
 							sb.append(" ");
 						}
 						pw.println(sb.toString());
 						if(PTA.isDebug())
 							IJ.log(sb.toString());
-						double[] x = Arrays.copyOfRange(cm.getDFrame(), 0, leastlen);
-						double[] y = Arrays.copyOfRange(cm.getMsdList(),0,leastlen);
-						CurveFitter cv = new CurveFitter(x,y);
 						if(isLinear) {
-							cv.doFit(CurveFitter.STRAIGHT_LINE);
-							IJ.log(cv.getParams()[0]+" "+cv.getParams()[1]+" "+cv.getRSquared());
+							IJ.log(res.getA()+" "+res.getB()+" "+res.getR());
 						} else {
-							cv.doFit(CurveFitter.POLY2);
-							IJ.log(cv.getParams()[0]+" "+cv.getParams()[1]+" "+cv.getParams()[2]+" "+cv.getRSquared());						
+							IJ.log(res.getA()+" "+res.getB()+" "+res.getC()+" "+res.getR());						
 						}
 					}
 					pw.close();
@@ -1108,7 +1098,7 @@ public class ShowPdata extends JFrame{
 		double y=t*dy+l1y;
 		return Math.sqrt((x-px)*(x-px)+(y-py)*(y-py));
 	}
-	public ArrayList<MSDdata> calcMSD(
+	public ArrayList<MSDdata> doMSDanalysis(
 			List<List<FPoint>> pointlist, 
 			int[] selectedList, 
 			double leastlenTime,
@@ -1116,11 +1106,6 @@ public class ShowPdata extends JFrame{
 			){
 		int leastlen = (int)(leastlenTime/cal.frameInterval);
 		leastlen = leastlen<=3?3:leastlen;		
-		String lp;
-		if (isLinear)
-			lp = "Linear";
-		else 
-			lp = "Poly2";
 		
 		ArrayList<MSDdata> msdresults = new ArrayList<MSDdata>();
 		for(int index:selectedList) {
@@ -1136,12 +1121,12 @@ public class ShowPdata extends JFrame{
 			if(isLinear) {
 				cv.doFit(CurveFitter.STRAIGHT_LINE);
 				//IJ.log(cv.getParams()[0]+" "+cv.getParams()[1]+" "+cv.getRSquared());
-				msdresults.add(new MSDdata(fullDF, fullMSD, cv.getParams()[0], cv.getParams()[1], cv.getRSquared()));
+				msdresults.add(new MSDdata(index, fullDF, fullMSD, cv.getParams()[0], cv.getParams()[1], cv.getRSquared()));
 				
 			} else {
 				cv.doFit(CurveFitter.POLY2);
 			//	IJ.log(cv.getParams()[0]+" "+cv.getParams()[1]+" "+cv.getParams()[2]+" "+cv.getRSquared());						
-				msdresults.add(new MSDdata(fullDF, fullMSD, cv.getParams()[0], cv.getParams()[1], cv.getParams()[2], cv.getRSquared()));
+				msdresults.add(new MSDdata(index, fullDF, fullMSD, cv.getParams()[0], cv.getParams()[1], cv.getParams()[2], cv.getRSquared()));
 			}
 		}
 		return msdresults;		
