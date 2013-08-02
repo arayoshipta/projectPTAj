@@ -26,6 +26,7 @@ import pta.PTA;
 import pta.calc.CalcBGData;
 import pta.calc.CalcMSD;
 import pta.calc.CalcVelocity;
+import pta.calc.FitMSD;
 import pta.data.FPoint;
 import pta.data.MSDdata;
 import pta.data.PtaParam;
@@ -569,7 +570,8 @@ public class ShowPdata extends JFrame{
 				if(gd.wasCanceled()) return;
 				double leastlenTime = (double)gd.getNextNumber();
 				boolean isLinear =gd.getNextBoolean();
-				ArrayList<MSDdata> reslist = doMSDanalysis(pointlist, selectedList, leastlenTime, isLinear);
+				FitMSD fitmsd = new FitMSD(pointlist, cal);
+				ArrayList<MSDdata> reslist = fitmsd.doMSDanalysis(selectedList, leastlenTime, isLinear);
 				String lp;
 				if (isLinear)
 					lp = "Linear";
@@ -1098,39 +1100,39 @@ public class ShowPdata extends JFrame{
 		double y=t*dy+l1y;
 		return Math.sqrt((x-px)*(x-px)+(y-py)*(y-py));
 	}
-	public ArrayList<MSDdata> doMSDanalysis(
-			List<List<FPoint>> pointlist, 
-			int[] selectedList, 
-			double leastlenTime,
-			boolean isLinear
-			){
-		int leastlen = (int)(leastlenTime/cal.frameInterval);
-		leastlen = leastlen<=3?3:leastlen;		
-		
-		ArrayList<MSDdata> msdresults = new ArrayList<MSDdata>();
-		for(int index:selectedList) {
-			if(pointlist.get(index).size()<leastlen) continue; // if the length of pointlist is less than leastlen, skip it.
-
-			CalcMSD cm = new CalcMSD(pointlist.get(index),leastlen,cal);
-
-			double[] fullDF = cm.getDFrame();
-			double[] fullMSD = cm.getMsdList();
-			double[] x = Arrays.copyOfRange(fullDF, 0, leastlen);
-			double[] y = Arrays.copyOfRange(fullMSD,0,leastlen);
-			CurveFitter cv = new CurveFitter(x,y);
-			if(isLinear) {
-				cv.doFit(CurveFitter.STRAIGHT_LINE);
-				//IJ.log(cv.getParams()[0]+" "+cv.getParams()[1]+" "+cv.getRSquared());
-				msdresults.add(new MSDdata(index, fullDF, fullMSD, cv.getParams()[0], cv.getParams()[1], cv.getRSquared()));
-				
-			} else {
-				cv.doFit(CurveFitter.POLY2);
-			//	IJ.log(cv.getParams()[0]+" "+cv.getParams()[1]+" "+cv.getParams()[2]+" "+cv.getRSquared());						
-				msdresults.add(new MSDdata(index, fullDF, fullMSD, cv.getParams()[0], cv.getParams()[1], cv.getParams()[2], cv.getRSquared()));
-			}
-		}
-		return msdresults;		
-	}
+//	public ArrayList<MSDdata> doMSDanalysis(
+//			List<List<FPoint>> pointlist, 
+//			int[] selectedList, 
+//			double leastlenTime,
+//			boolean isLinear
+//			){
+//		int leastlen = (int)(leastlenTime/cal.frameInterval);
+//		leastlen = leastlen<=3?3:leastlen;		
+//		
+//		ArrayList<MSDdata> msdresults = new ArrayList<MSDdata>();
+//		for(int index:selectedList) {
+//			if(pointlist.get(index).size()<leastlen) continue; // if the length of pointlist is less than leastlen, skip it.
+//
+//			CalcMSD cm = new CalcMSD(pointlist.get(index),leastlen,cal);
+//
+//			double[] fullDF = cm.getDFrame();
+//			double[] fullMSD = cm.getMsdList();
+//			double[] x = Arrays.copyOfRange(fullDF, 0, leastlen);
+//			double[] y = Arrays.copyOfRange(fullMSD,0,leastlen);
+//			CurveFitter cv = new CurveFitter(x,y);
+//			if(isLinear) {
+//				cv.doFit(CurveFitter.STRAIGHT_LINE);
+//				//IJ.log(cv.getParams()[0]+" "+cv.getParams()[1]+" "+cv.getRSquared());
+//				msdresults.add(new MSDdata(index, fullDF, fullMSD, cv.getParams()[0], cv.getParams()[1], cv.getRSquared()));
+//				
+//			} else {
+//				cv.doFit(CurveFitter.POLY2);
+//			//	IJ.log(cv.getParams()[0]+" "+cv.getParams()[1]+" "+cv.getParams()[2]+" "+cv.getRSquared());						
+//				msdresults.add(new MSDdata(index, fullDF, fullMSD, cv.getParams()[0], cv.getParams()[1], cv.getParams()[2], cv.getRSquared()));
+//			}
+//		}
+//		return msdresults;		
+//	}
 	
 }
 class ColorTableRenderer extends DefaultTableCellRenderer{

@@ -12,7 +12,9 @@ import javax.swing.JOptionPane;
 //import ZS.Solve.LM;
 
 
+
 import pta.*;
+import pta.calc.FitMSD;
 import pta.data.*;
 import pta.gui.ShowPdata;
 
@@ -405,21 +407,16 @@ public class DetectParticle extends Thread implements Measurements{
 	 * @return an arraylist of MSDdata objects, each for a track
 	 */
 	public ArrayList<MSDdata> getMSDres(double leastlenTime, boolean isLinear){
-		if ( pData == null ){
-			IJ.log("ShowPdata object is null");
-			return null;
-		}
 		if (linkedPointList == null){
 			IJ.log("point list is null");
 			return null;
 		}
-		List<List<FPoint>> pointlist = linkedPointList;
-		int[] selectedList = new int[pointlist.size()];
-		for(int i=0;i<pointlist.size();i++) selectedList[i]=i;
+		FitMSD fitmsd = new FitMSD(linkedPointList, cal);
+		ArrayList<MSDdata> reslist = fitmsd.doMSDanalysis(leastlenTime, isLinear);
 		
 		//@TODO there could be some filter here. 
 		
-		return pData.doMSDanalysis(linkedPointList, selectedList, leastlenTime, isLinear);
+		return reslist;
 	}
 
 	/**
@@ -430,13 +427,12 @@ public class DetectParticle extends Thread implements Measurements{
 	 * @return an arraylist of MSDdata objects, each for a track
 	 */
 	public ArrayList<MSDdata> getMSDres(int[] selectedList, double leastlenTime, boolean isLinear){
-		if ( pData == null )
-			return null;
 		if (linkedPointList == null)
 			return null;
-		
+		FitMSD fitmsd = new FitMSD(linkedPointList, cal);
+		ArrayList<MSDdata> reslist = fitmsd.doMSDanalysis(selectedList, leastlenTime, isLinear);
 		//@TODO there could be some filter here. 		
-		return pData.doMSDanalysis(linkedPointList, selectedList, leastlenTime, isLinear);
+		return reslist;
 	}	
 
 	public Roi getScanRoi() {

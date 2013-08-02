@@ -8,15 +8,23 @@ import java.util.List;
 import pta.PTA;
 import pta.data.FPoint;
 
-
-
 public class CalcMSD {
 	//	private double[] msdList;
 	//	private double[] dframe;
 	private ArrayList<Double> msdList;
 	private ArrayList<Double> dframe;
+	private Calibration cal;
+	private List<FPoint> pointlist;
+	private int leastLength;
 
 	public CalcMSD(final List<FPoint> pointlist,final int leastLength,Calibration cal) {
+		this.pointlist = pointlist;
+		this.leastLength = leastLength;
+		this.cal = cal;
+		run();
+	}
+	
+	public void run(){
 		try {
 			if (pointlist.size()<leastLength) 
 				return;
