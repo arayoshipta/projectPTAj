@@ -10,7 +10,13 @@ import java.util.Arrays;
 
 import pta.data.MSDdata;
 import pta.data.FPoint;
-
+/**
+ * Takes a pointlist (=tracks) and does MSD fanalysis. 
+ * Output will be an ArrayList of MSDdata objects. 
+ * 20130803
+ * 
+ * @author arayoshi, kota
+ */
 public class FitMSD {
 	
 	private List<List<FPoint>> pointlist;
@@ -30,7 +36,7 @@ public class FitMSD {
 	 * All tracks are selected in this case. 
 	 * @param leastlenTime
 	 * @param isLinear
-	 * @return
+	 * @return An ArrayList of MSDData objects. 
 	 */
 	public ArrayList<MSDdata> doMSDanalysis(
 			double leastlenTime,
@@ -41,7 +47,14 @@ public class FitMSD {
 		ArrayList<MSDdata> msdresults = doMSDanalysis(selectedList, leastlenTime, isLinear);
 		return msdresults;
 	}
-			
+	/**
+	 * Among all tracks within the pointlist (=tracks), only those in the selectedlist 
+	 * will be analyzed. selectedlist is an int[] with ID numbers. 		
+	 * @param selectedList
+	 * @param leastlenTime
+	 * @param isLinear
+	 * @return An ArrayList of MSDData objects.
+	 */
 	public ArrayList<MSDdata> doMSDanalysis(
 			int[] selectedList, 
 			double leastlenTime,
@@ -71,12 +84,11 @@ public class FitMSD {
 			if(isLinear) {
 				cv.doFit(CurveFitter.STRAIGHT_LINE);
 				//IJ.log(cv.getParams()[0]+" "+cv.getParams()[1]+" "+cv.getRSquared());
-				msdresults.add(new MSDdata(index, fullDF, fullMSD, cv.getParams()[0], cv.getParams()[1], cv.getRSquared()));
-				//IJ.log(Double.toString(cv.getParams()[0]));
+				msdresults.add(new MSDdata(index, pointlist.get(index), fullDF, fullMSD, cv.getParams()[0], cv.getParams()[1], cv.getRSquared()));
 			} else {
 				cv.doFit(CurveFitter.POLY2);
 			//	IJ.log(cv.getParams()[0]+" "+cv.getParams()[1]+" "+cv.getParams()[2]+" "+cv.getRSquared());						
-				msdresults.add(new MSDdata(index, fullDF, fullMSD, cv.getParams()[0], cv.getParams()[1], cv.getParams()[2], cv.getRSquared()));
+				msdresults.add(new MSDdata(index, pointlist.get(index), fullDF, fullMSD, cv.getParams()[0], cv.getParams()[1], cv.getParams()[2], cv.getRSquared()));
 			}
 		}
 		return msdresults;		
