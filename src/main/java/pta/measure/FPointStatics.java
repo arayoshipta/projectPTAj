@@ -79,6 +79,10 @@ public class FPointStatics {
 		return totalFrame;
 	}
 
+	/**
+	 * 
+	 * @return SD of Fluorescence Intensity
+	 */
 	public double getSdFI() {
 		return sdFI;
 	}
@@ -91,6 +95,10 @@ public class FPointStatics {
 		return sdX;
 	}
 
+	/**
+	 * 
+	 * @return Average Fluorescence Intensity
+	 */
 	public double getAveFI() {
 		return aveFI;
 	}
