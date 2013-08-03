@@ -23,7 +23,7 @@ import ij.measure.Calibration;
 import ij.plugin.frame.*;
 import ij.process.ImageProcessor;
 
-/*
+/**
  * Particle Track and Analysis (PTA)
  * developed by Yoshiyuki Arai
  * PTA Particle Track and Analysis Copyright (2010) Yoshiyuki Arai. All rights reserved.
