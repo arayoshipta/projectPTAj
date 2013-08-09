@@ -59,7 +59,8 @@ public class CalcMSD {
 						if(cnt !=0) {
 
 							//				msdList[k-1]=len/(cnt*cal.frameInterval);
-							msdList.add(new Double(len/(cnt*cal.frameInterval)));
+							//msdList.add(new Double(len/(cnt*cal.frameInterval))); <- This is wrong!
+							msdList.add(new Double(len/cnt));
 							dframe.add(new Double(k*cal.frameInterval));
 
 						}
