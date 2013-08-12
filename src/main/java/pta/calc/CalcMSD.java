@@ -7,16 +7,31 @@ import java.util.List;
 
 import pta.PTA;
 import pta.data.FPoint;
-
-
-
+/**
+ * Core of the MSD calculation. 
+ * Fitting will be done by the class FitMSD. 
+ * 
+ * @author arayoshi
+ * modified by Kota 20130803
+ *
+ */
 public class CalcMSD {
 	//	private double[] msdList;
 	//	private double[] dframe;
 	private ArrayList<Double> msdList;
 	private ArrayList<Double> dframe;
+	private Calibration cal;
+	private List<FPoint> pointlist;
+	private int leastLength;
 
 	public CalcMSD(final List<FPoint> pointlist,final int leastLength,Calibration cal) {
+		this.pointlist = pointlist;
+		this.leastLength = leastLength;
+		this.cal = cal;
+		run();
+	}
+	
+	public void run(){
 		try {
 			if (pointlist.size()<leastLength) 
 				return;
