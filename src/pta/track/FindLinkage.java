@@ -9,10 +9,7 @@ import pta.data.FPoint;
 import pta.data.PtaParam;
 
 
-/**
- * Linking algorithm, nearest neighbor with some stepping over allowed. 
- *
- */
+
 public class FindLinkage {
 
 	private List<List<FPoint>> alldplist;

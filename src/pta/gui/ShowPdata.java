@@ -5,7 +5,6 @@ import ij.io.SaveDialog;
 import ij.measure.*;
 import ij.process.*;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.awt.*;
@@ -15,7 +14,6 @@ import java.io.*;
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.table.*;
-
 import org.jfree.chart.*;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.*;
@@ -26,21 +24,12 @@ import pta.PTA;
 import pta.calc.CalcBGData;
 import pta.calc.CalcMSD;
 import pta.calc.CalcVelocity;
-import pta.calc.FitMSD;
 import pta.data.FPoint;
-import pta.data.MSDdata;
 import pta.data.PtaParam;
 import pta.measure.FPointStatics;
 import pta.measure.PlRelation;
 
-/**
- * A Class for the interactive table, with a list of tracks and their parameters. 
- * Checkbox allows users to select specific tracks fro further analysis. 
- * The menu has analysis items such as velocity and MSD calculation. 
- * 
- * @author arayoshi
- *
- */
+
 
 public class ShowPdata extends JFrame{
 
@@ -76,7 +65,7 @@ public class ShowPdata extends JFrame{
 	 * constructor
 	 */	
 
-	public ShowPdata(List<List<FPoint>> pointlist, ImagePlus imp,PtaParam ptap, boolean nogui) {
+	public ShowPdata(List<List<FPoint>> pointlist, ImagePlus imp,PtaParam ptap) {
 		this.pointlist = pointlist;
 		this.imp = imp;
 		this.cal = imp.getCalibration();
@@ -87,8 +76,7 @@ public class ShowPdata extends JFrame{
 		setTableObjectData(pointlist);
 		sda = new saveDataAction();
 
-		if (!nogui) 
-			new makeTableFrame(this);
+		new makeTableFrame(this);
 		PTA.setSelectedList(pointlist, selectedList);
 		PTA.setAnalyzedImp(imp);
 		//		IJ.log("pData constructed");
@@ -389,7 +377,7 @@ public class ShowPdata extends JFrame{
 			statMenu.add(statSelected);
 			statMenu.add(statSD);
 
-			
+
 			frame.setVisible(true);
 			frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 			WindowManager.addWindow((Frame)frame);
@@ -572,13 +560,14 @@ public class ShowPdata extends JFrame{
 			if(b.getText() == "calc MSD") {
 				GenericDialog gd = new GenericDialog("Calculate MSD");
 				gd.addNumericField("delta "+cal.getTimeUnit()+" length for MSD calc", 5, 0);
+
 				gd.addCheckbox("Linear(true) or Poly2(false)", true);
 				gd.showDialog();
 				if(gd.wasCanceled()) return;
 				double leastlenTime = (double)gd.getNextNumber();
 				boolean isLinear =gd.getNextBoolean();
-				FitMSD fitmsd = new FitMSD(pointlist, cal);
-				ArrayList<MSDdata> reslist = fitmsd.doMSDanalysis(selectedList, leastlenTime, isLinear);
+				int leastlen = (int)(leastlenTime/cal.frameInterval);
+				leastlen = leastlen<=3?3:leastlen;
 				String lp;
 				if (isLinear)
 					lp = "Linear";
@@ -595,22 +584,30 @@ public class ShowPdata extends JFrame{
 						IJ.log("y=a+bx+cx^2");
 						IJ.log("a b c R^2");
 					}
-					for(MSDdata res:reslist) {
+					for(int index:selectedList) {
+						if(pointlist.get(index).size()<leastlen) continue; // if the length of pointlist is less than leastlen, skip it.
+
+						CalcMSD cm = new CalcMSD(pointlist.get(index),leastlen,cal);
 						StringBuilder sb = new StringBuilder();
 						sb.append("Point");
-						sb.append(res.getID());
+						sb.append(index);
 						sb.append(": ");
-						for(double msd:res.getFullMSD()) {
+						for(double msd:cm.getMsdList()) {
 							sb.append(msd);
 							sb.append(" ");
 						}
 						pw.println(sb.toString());
 						if(PTA.isDebug())
 							IJ.log(sb.toString());
+						double[] x = Arrays.copyOfRange(cm.getDFrame(), 0, leastlen);
+						double[] y = Arrays.copyOfRange(cm.getMsdList(),0,leastlen);
+						CurveFitter cv = new CurveFitter(x,y);
 						if(isLinear) {
-							IJ.log(res.getA()+" "+res.getB()+" "+res.getR());
+							cv.doFit(CurveFitter.STRAIGHT_LINE);
+							IJ.log(cv.getParams()[0]+" "+cv.getParams()[1]+" "+cv.getRSquared());
 						} else {
-							IJ.log(res.getA()+" "+res.getB()+" "+res.getC()+" "+res.getR());						
+							cv.doFit(CurveFitter.POLY2);
+							IJ.log(cv.getParams()[0]+" "+cv.getParams()[1]+" "+cv.getParams()[2]+" "+cv.getRSquared());						
 						}
 					}
 					pw.close();
@@ -644,7 +641,7 @@ public class ShowPdata extends JFrame{
 				}
 			} else if(b.getText() == "Re-fit by 2DGauss") {
 				GenericDialog gd = new GenericDialog("Re-fit by 2DGauss");
-				gd.addMessage("Do you really want to re-fit the data by 2DGaussian function?");
+				gd.addMessage("Are you really want to re-fit the data by 2DGaussian function?");
 				gd.showDialog();
 				if(gd.wasCanceled()) return;
 
@@ -714,15 +711,15 @@ public class ShowPdata extends JFrame{
 					jt.setValueAt(fps.getRunlength(), jt.convertRowIndexToView(index),5);
 				}
 				imp.setRoi(preRoi);
-				IJ.showStatus("Re-Fitting finished");
+				IJ.showStatus("Re-Fitting has done");
 				drawTrajectory(pointlist.get(jt.convertRowIndexToModel(jt.getSelectedRows()[0])));
-			} else if (b.getText() == "Extract points along LineRoi") {
+			} else if (b.getText() == "Extract point along LineRoi") {
 				Roi roi = imp.getRoi();
 				if (roi==null) {
 					IJ.error("No Roi");
 					return;
 				}
-				GenericDialog gd = new GenericDialog("Extract points along the Line");
+				GenericDialog gd = new GenericDialog("Extract point along the Line");
 				gd.addNumericField("Distance Range (+-Pixels)", 1, 1);
 				gd.addNumericField("Around distance (+-Pixels)", 5, 1);
 				gd.showDialog();
@@ -745,7 +742,7 @@ public class ShowPdata extends JFrame{
 					xc[0]=lroi.x1;xc[1]=lroi.x2;yc[0]=lroi.y1;yc[1]=lroi.y2;num=2;
 					r.x=r.y=0;
 				} else {
-					IJ.error("Roi must be either a straight or a segemented line");
+					IJ.error("Roi must be Line or segemented Line");
 					return;
 				}
 				for(int index=0;index<pointlist.size();index++) {
@@ -812,8 +809,8 @@ public class ShowPdata extends JFrame{
 			boolean subBg = false;
 			if(PTA.isBgSub()) {
 				GenericDialog gd = new GenericDialog("Subtract Backgroud");
-				gd.addMessage("Do you want to apply calculating the background?\n" +
-				"(This process may take a while if you have many points)");
+				gd.addMessage("Do you want to apply calculateing the background?\n" +
+				"(This process may take time if you have many points)");
 				gd.addCheckbox("Calculate Background", false);
 				gd.showDialog();
 				subBg=gd.getNextBoolean();
@@ -1107,7 +1104,6 @@ public class ShowPdata extends JFrame{
 		double y=t*dy+l1y;
 		return Math.sqrt((x-px)*(x-px)+(y-py)*(y-py));
 	}
-	
 }
 class ColorTableRenderer extends DefaultTableCellRenderer{
 	private static final long serialVersionUID = 1L;
@@ -1155,6 +1151,4 @@ class MyCellRenderer extends JLabel implements ListCellRenderer {
 		}
 		return this;
 	}
-	
 }
-

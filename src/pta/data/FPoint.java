@@ -6,12 +6,6 @@ import java.awt.Color;
 import java.io.Serializable;
 import java.util.*;
 
-/**
- * Represents a detected point. 
- * 
- * @author arayoshi
- *
- */
 public class FPoint implements Serializable{
 	
 	/**
@@ -21,18 +15,9 @@ public class FPoint implements Serializable{
 	private double[] param = new double[6];	// array for parameter
 	private double roiInt;
 	private int[] info = new int[2];	// array for info and itteration number
-	
-	/**
-	 * "Pixel" coordinate values for Roi
-	 */
-	private int sx,sy; 
+	private int sx,sy; // "Pixel" coordinate values for Roi
 	private Color color;
-	
-	/**
-	 * centroid (x, y)
-	 * "Unit" (c.f. "micron", "mm") coordinate values for position
-	 */
-	private double cx,cy; 
+	private double cx,cy; // "Unit" (c.f. "micron", "mm") coordinate values for position
 	private FPoint pre;
 	private FPoint post;
 	private int frame;

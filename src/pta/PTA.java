@@ -23,10 +23,10 @@ import ij.measure.Calibration;
 import ij.plugin.frame.*;
 import ij.process.ImageProcessor;
 
-/**
+/*
  * Particle Track and Analysis (PTA)
  * developed by Yoshiyuki Arai
- * PTA Particle Track and Analysis Copyright (2010) Yoshiyuki Arai. All rights reserved.
+ * PTA Particle Track and Analysis Copyright (2010) Yoshiyuki Arai. All rights reserved.‚‘
  */
 
 public class PTA extends PlugInFrame{
@@ -128,10 +128,6 @@ public class PTA extends PlugInFrame{
 	private JButton jSaveParamButton;
 	private JPanel jShowPathPanel;
 	private JPanel jShowRoiPanel;
-	
-	private static boolean noGUI = false;
-	private static boolean debugflag = false; 
-	
 	// End of variables declaration
 	public PTA() {
 		super("PTA");
@@ -139,13 +135,7 @@ public class PTA extends PlugInFrame{
 		if (IJ.versionLessThan("1.43g"))
 			return;
 		if (frame != null){
-			if (!noGUI){ 
-				setVisible(true);
-				WindowManager.addWindow(this);
-				IJ.error("PTA is already implemented");
-			} else {
-				IJ.log("No GUI, but using already existing instance.");
-			}
+			IJ.error("PTA is already implemented");
 			return;
 		}
 		frame = this;
@@ -168,10 +158,8 @@ public class PTA extends PlugInFrame{
 		}
 		initComponents();
 		GUI.center(this);
-		if (!noGUI){
-			setVisible(true);
-			WindowManager.addWindow(this);
-		}
+		setVisible(true);
+		WindowManager.addWindow(this);
 		ImagePlus.addImageListener(listener);
 	}
 	private void initComponents() {
@@ -404,8 +392,7 @@ public class PTA extends PlugInFrame{
 				Roi tmpAreaRoi = imp.getRoi();
 				if(tmpAreaRoi != null && tmpAreaRoi.getType() == Roi.RECTANGLE)
 					scanAreaRoi =imp.getRoi();
-				// detect particle with GUI
-				dp = new DetectParticle(ptap,imp,scanAreaRoi,pData, false);
+				dp = new DetectParticle(ptap,imp,scanAreaRoi,pData);
 				ptap.setDo2dGaussfit(j2DGaussCheckbox.isSelected());
 				// test by LMA with JAMA
 //				ptap.setDo2dGaussfitbyLMA(jLmaCheckbox.isSelected());
@@ -837,10 +824,7 @@ public class PTA extends PlugInFrame{
 	}
 
 	public static boolean isDebug() {
-		if (noGUI)
-			return debugflag;
-		else
-			return jDebugCheckbox.isSelected();
+		return jDebugCheckbox.isSelected();
 	}
 
 	public static void setPdata(ImagePlus img,ShowPdata data) {
@@ -862,7 +846,6 @@ public class PTA extends PlugInFrame{
 	}
 	
 	public static boolean isBgSub() {
-		
 		return jSubBgCheckBox.isSelected();
 	}
 	
@@ -872,16 +855,5 @@ public class PTA extends PlugInFrame{
 	
 	public static boolean isRoiInt() {
 		return jRadioROIButton.isSelected();
-	}
-	
-	public static void setDebugMode(){
-		debugflag = true;
-	}
-	
-	public static void setNoGUI(boolean nogui){
-		noGUI = nogui; 
-	}
-	public DetectParticle getDetectParticle(){
-		return this.dp;
 	}
 }
