@@ -238,7 +238,7 @@ public class ShowPdata extends JFrame{
 			}
 			msdxy.addSeries("msd", msddata);
 			JFreeChart msdchart = 
-				ChartFactory.createXYLineChart("MSD", "delta "+cal.getTimeUnit(), "msd ["+cal.getUnit()+"^2/"+cal.getTimeUnit()+"]", msdxy, PlotOrientation.VERTICAL,false, true, false);
+				ChartFactory.createXYLineChart("MSD", "delta "+cal.getTimeUnit(), "msd ["+cal.getUnit()+"^2]", msdxy, PlotOrientation.VERTICAL,false, true, false);
 			if(msdpanel == null) {
 				msdpanel = new ChartPanel(msdchart);
 				cFrame.getContentPane().add(msdpanel);
