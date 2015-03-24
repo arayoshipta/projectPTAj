@@ -1,4 +1,11 @@
-= remarks to the user =
+---------------------'ATTENTION'-----------------------
+I have corrected the inadequate indication in MSD plot.
+Please use the latest version of PTA_.jar and manual.
+
+Sorry for your inconvenience.
+2015.03.24
+-------------------------------------------------------
+
 
 The main purpose of this plugin is to track the single molecule fluorescence particles. 
 But the objects which can be discrimanted by threshold can be detected and tracked (for example, moving cells). 
