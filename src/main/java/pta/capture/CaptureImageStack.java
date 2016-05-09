@@ -10,7 +10,6 @@ public class CaptureImageStack implements PlugInFilter {
 	private ImagePlus imp;
 
 	public void run(ImageProcessor ip) {
-		// TODO Auto-generated method stub
 		// show Dialog
 		GenericDialog gd = new GenericDialog("Make caputured stack");
 		gd.addNumericField("start Frame", 1, 0);
@@ -23,7 +22,6 @@ public class CaptureImageStack implements PlugInFilter {
 	}
 
 	public int setup(String arg, ImagePlus imp) {
-		// TODO Auto-generated method stub
 		this.imp = imp;
 		return DOES_ALL;
 	}

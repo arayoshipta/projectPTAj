@@ -68,7 +68,6 @@ public class FPoint implements Serializable{
 	}
 
 	private void setRoiInt(double roiInt) {
-		// TODO Auto-generated method stub
 		this.roiInt = roiInt;
 	}
 
