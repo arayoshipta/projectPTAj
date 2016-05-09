@@ -11,7 +11,10 @@ import javax.swing.JOptionPane;
 //import ZS.Solve.LMfunc;
 //import ZS.Solve.LM;
 
+
+
 import pta.*;
+import pta.calc.FitMSD;
 import pta.data.*;
 import pta.gui.ShowPdata;
 
@@ -36,12 +39,14 @@ public class DetectParticle extends Thread implements Measurements{
 	private ShowPdata pData;
 	private boolean multiFrames = false;
 	private boolean isDetection = false;
+	private boolean noGUI = false;
+	private List<List<FPoint>> linkedPointList;
 
 	/*
 	 * Constructor for multiple frames. this can return alldplist
 	 */
 	public DetectParticle(PtaParam ptap,ImagePlus imp,Roi scanRoi,
-			ShowPdata pData) 
+			ShowPdata pData, boolean nogui) 
 	{
 		this.imp = imp;
 		this.dplist = null;
@@ -49,10 +54,30 @@ public class DetectParticle extends Thread implements Measurements{
 		this.multiFrames = true;
 		this.ims = imp.getImageStack();
 		this.cal = imp.getCalibration();
+		this.noGUI = nogui;
 		setPtap(ptap);
 		setScanRoi(scanRoi);
 		init();
 	}
+
+	/*
+	 * Constructor for multiple frames. this can return alldplist
+	 * no GUI version
+	 */
+	public DetectParticle(PtaParam ptap,ImagePlus imp,Roi scanRoi, boolean nogui) 
+	{
+		this.imp = imp;
+		this.dplist = null;
+		//this.pData = pData;
+		this.multiFrames = true;
+		this.ims = imp.getImageStack();
+		this.cal = imp.getCalibration();
+		this.noGUI = nogui;
+		setPtap(ptap);
+		setScanRoi(scanRoi);
+		init();
+	}
+	
 	/*
 	 * Constructor for single frames. This can return dplist
 	 */
@@ -72,6 +97,30 @@ public class DetectParticle extends Thread implements Measurements{
 		init();
 	}
 
+	/**
+	 * no GUI version of above.
+	 * @param ptap
+	 * @param imp
+	 * @param scanRoi
+	 * @param dplist
+	 * @param isDetection
+	 */
+	public DetectParticle(PtaParam ptap,ImagePlus imp,Roi scanRoi,
+			List<FPoint> dplist,boolean isDetection) {
+		this.imp = imp;
+		this.ims = imp.getImageStack();
+		this.cal = imp.getCalibration();
+		this.dplist = dplist;
+		this.isDetection = isDetection;
+		this.startSlice = imp.getCurrentSlice();
+		this.multiFrames = false;
+
+		setPtap(ptap);
+		setScanRoi(scanRoi);
+		setNoGUI();
+		init();
+	}	
+	
 	private void init() {
 		ImageProcessor ip = imp.getProcessor();
 		lt=Math.round(ip.getMinThreshold());
@@ -79,8 +128,10 @@ public class DetectParticle extends Thread implements Measurements{
 			ht=Math.round(ip.getMaxThreshold());
 		else
 			ht=65535;
-		if(PTA.isDebug())
-			IJ.log(cal.toString());
+		if (!this.noGUI){
+			if(PTA.isDebug())
+				IJ.log(cal.toString());
+		}
 	}
 
 	public void setPtap(PtaParam ptap) {
@@ -210,6 +261,43 @@ public class DetectParticle extends Thread implements Measurements{
 								param[4] += (double)iyy*cal.pixelHeight;
 								param[1] *= cal.pixelWidth;
 								param[2] *= cal.pixelHeight;
+//							} else if (ptap.isDo2dGaussfitbyLMA()) { //---from--- test for LMA with JAMA
+//
+//									param[1] /= cal.pixelWidth;
+//									param[2] /= cal.pixelHeight;
+//									param[3] = (double)ptap.getRoiSizex()/2.0D;
+//									param[4] = (double)ptap.getRoiSizey()/2.0D;
+//			// --from-- test by LM
+//									LMfunc f = new LM2DGauss();
+//									double[] s = new double[ptap.getRoiSizex()*ptap.getRoiSizey()];
+//									double[][] lmx = new double[ptap.getRoiSizex()*ptap.getRoiSizey()][2];
+//									int kkkindex=0;
+//									for(int jjjj=0;jjjj<ptap.getRoiSizex();jjjj++)
+//										for(int iiii=0;iiii<ptap.getRoiSizey();iiii++) {
+//										lmx[kkkindex][0]=iiii;
+//										lmx[kkkindex][1]=jjjj;
+//										kkkindex++;
+//										}
+//									for(int kkk=0;kkk<ptap.getRoiSizex()*ptap.getRoiSizey();kkk++)
+//										s[kkk]=0.1;
+//									boolean[] vary = new boolean[param.length];
+//									for( int jjj = 0; jjj < param.length; jjj++ ) vary[jjj] = true;
+//									try {
+//										LM.solve(lmx, param, fionaData, s, vary, f, 0.001, 0.01, 1000, 0);
+//									} catch (Exception e) {
+//										// TODO Auto-generated catch block
+//										IJ.log(e.toString());
+//									}
+//									info[0]=1;
+//			// --- to ---
+//							
+//									param[3] *= cal.pixelWidth; // to translate pixel data to unit data
+//									param[4] *= cal.pixelHeight;
+//									param[3] += (double)ixx*cal.pixelWidth;
+//									param[4] += (double)iyy*cal.pixelHeight;
+//									param[1] *= cal.pixelWidth;
+//									param[2] *= cal.pixelHeight;
+
 								} else {
 								//---to---
 								param[0] = intInt;
@@ -276,7 +364,9 @@ public class DetectParticle extends Thread implements Measurements{
 	public void run() {
 		int slice = startSlice;
 		IJ.resetEscape();
+		IJ.log("Detecting points...");
 		if(multiFrames) {
+			IJ.log("multiframes");
 			do{
 				if(IJ.escapePressed()) {
 					IJ.resetEscape();
@@ -285,8 +375,10 @@ public class DetectParticle extends Thread implements Measurements{
 					if(ret == 0)
 						break;
 				}
+				//IJ.log("slice" + slice);
 				alldplist.add(slice-1, new ArrayList<FPoint>(dpOneSlice(slice)));
 				slice++;
+				//IJ.log("list size"+alldplist.size());
 			} while (slice<=endSlice);
 			PTA.setDetectionState(false);
 			processPData();
@@ -303,12 +395,62 @@ public class DetectParticle extends Thread implements Measurements{
 	public void processPData() {
 		Overlay pathOverlay = new Overlay();
 		new FindLinkage(alldplist,ptap,imp).run();
-		pData = new ShowPdata(new MakePointList(alldplist,pathOverlay,2).run()
-				,imp,ptap);
+		linkedPointList = new MakePointList(alldplist,pathOverlay,2).run();
+		pData = new ShowPdata(linkedPointList, imp, ptap, noGUI);
 		imp.setOverlay(pathOverlay);
 	}
+	
+	/**
+	 * For getting MSD from scripts
+	 * @param leastlenTime
+	 * @param isLinear
+	 * @return an arraylist of MSDdata objects, each for a track
+	 */
+	public ArrayList<MSDdata> getMSDres(double leastlenTime, boolean isLinear){
+		if (linkedPointList == null){
+			IJ.log("point list is null");
+			return null;
+		}
+		FitMSD fitmsd = new FitMSD(linkedPointList, cal);
+		ArrayList<MSDdata> reslist = fitmsd.doMSDanalysis(leastlenTime, isLinear);
+		
+		//@TODO there could be some filter here. 
+		
+		return reslist;
+	}
+
+	/**
+	 * For getting MSD from scripts
+	 * @param selectedList
+	 * @param leastlenTime
+	 * @param isLinear
+	 * @return an arraylist of MSDdata objects, each for a track
+	 */
+	public ArrayList<MSDdata> getMSDres(int[] selectedList, double leastlenTime, boolean isLinear){
+		if (linkedPointList == null)
+			return null;
+		FitMSD fitmsd = new FitMSD(linkedPointList, cal);
+		ArrayList<MSDdata> reslist = fitmsd.doMSDanalysis(selectedList, leastlenTime, isLinear);
+		//@TODO there could be some filter here. 		
+		return reslist;
+	}	
 
 	public Roi getScanRoi() {
 		return scanRoi;
+	}
+	
+	public void setNoGUI(){
+		noGUI = true;
+	}
+	public ShowPdata getShowPdata(){
+		return this.pData;
+	}
+	
+	public List<List<FPoint>> getalldplist(){
+		return alldplist;
+	}
+
+	public List<List<FPoint>> getLinkedPointList() {
+		return linkedPointList;
 	}
 }
