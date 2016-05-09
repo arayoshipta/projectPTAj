@@ -17,7 +17,7 @@
 
 	<name>plugins/PTA_</name>
   <description>A Maven project implementing an ImageJ 1.x plugin
-               Partices like Single Molecule Tracker 
+               Particles like Single Molecule Tracker
   </description>
 
 	<dependencies>
