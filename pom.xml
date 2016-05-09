@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+		http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.scijava</groupId>
+		<artifactId>pom-scijava</artifactId>
+		<version>1.28</version>
+	</parent>
+
+	<groupId>yo4.ara</groupId>
+	<artifactId>PTA_</artifactId>
+	<version>1.0.0</version>
+
+	<name>plugins/PTA_</name>
+  <description>A Maven project implementing an ImageJ 1.x plugin
+               Partices like Single Molecule Tracker 
+  </description>
+
+	<dependencies>
+		<dependency>
+			<groupId>net.imagej</groupId>
+			<artifactId>ij</artifactId>
+			<version>${imagej1.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>jfree</groupId>
+			<artifactId>jcommon</artifactId>
+			<version>1.0.16</version>
+		</dependency>
+		<dependency>
+			<groupId>jfree</groupId>
+			<artifactId>jfreechart</artifactId>
+			<version>1.0.13</version>
+		</dependency>
+	</dependencies>
+
+
+	<developers>
+		<developer>
+			<id>arayoshi</id>
+			<name>Yoshiyuki Arai</name>
+			<organization>ISIR, Osaka University</organization>
+			<organizationUrl>http://www.sanken.osaka-u.ac.jp/bse/</organizationUrl>
+			<roles>
+				<role>architect</role>
+				<role>developer</role>
+			</roles>
+			<timezone>+1</timezone>
+		</developer>
+		<developer>
+			<id>kota</id>
+			<name>Kota Miura</name>
+			<email>miura@embl.de</email>
+      <url>http://cmci.embl.de</url>
+			<organization>EMBL Heidleberg</organization>
+			<organizationUrl>http://www.embl.de/</organizationUrl>
+			<roles>
+				<role>developer</role>
+			</roles>
+			<timezone>+1</timezone>
+		</developer>
+	</developers>
+
+	<!-- NB: for project parent 
+	-->
+	<repositories>
+		<repository>
+			<id>imagej.releases</id>
+			<url>http://maven.imagej.net/content/repositories/releases</url>
+		</repository>
+		<repository>
+			<id>imagej.snapshots</id>
+			<url>http://maven.imagej.net/content/repositories/snapshots</url>
+		</repository>
+	</repositories>
+  <!--
+	<scm>
+		<connection>scm:git:git://github.com/imagej/minimal-ij1-plugin</connection>
+		<developerConnection>scm:git:git@github.com:imagej/minimal-ij1-plugin</developerConnection>
+		<tag>HEAD</tag>
+		<url>https://github.com/imagej/minimal-ij1-plugin</url>
+  </scm>
+  -->
+
+</project>
