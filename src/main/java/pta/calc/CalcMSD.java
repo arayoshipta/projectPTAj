@@ -7,16 +7,30 @@ import java.util.List;
 
 import pta.PTA;
 import pta.data.FPoint;
-
-
-
+/**
+ * Core of the MSD calculation. 
+ * Fitting will be done by the class FitMSD. 
+ * 
+ * @author arayoshi
+ * modified by Kota 20130803
+ *
+ */
 public class CalcMSD {
-	//	private double[] msdList;
-	//	private double[] dframe;
+
 	private ArrayList<Double> msdList;
 	private ArrayList<Double> dframe;
+	private Calibration cal;
+	private List<FPoint> pointlist;
+	private int leastLength;
 
 	public CalcMSD(final List<FPoint> pointlist,final int leastLength,Calibration cal) {
+		this.pointlist = pointlist;
+		this.leastLength = leastLength;
+		this.cal = cal;
+		run();
+	}
+
+	public void run(){
 		try {
 			if (pointlist.size()<leastLength) 
 				return;
@@ -25,13 +39,9 @@ public class CalcMSD {
 					pointlist.get(pointlist.size()-1).getFrame()-pointlist.get(0).getFrame():calcFrameLen;
 					calcFrameLen = calcFrameLen<3?3:calcFrameLen;
 
-					//		msdList = new double[calcFrameLen];
-					//		dframe = new double[calcFrameLen];;
 					msdList = new ArrayList<Double>(0);
 					dframe = new ArrayList<Double>(0);
 					if(PTA.isDebug()) IJ.log("totalFrameLen ="+calcFrameLen);
-					//		msdList[0] = 0D;
-					//		dframe[0] = 0D;
 
 					int n=pointlist.size();
 					for(int k=1;k<=pointlist.get(pointlist.size()-1).getFrame();k++) { // shift value of k
@@ -57,19 +67,13 @@ public class CalcMSD {
 							}
 						}
 						if(cnt !=0) {
-
-							//				msdList[k-1]=len/(cnt*cal.frameInterval);
-							//msdList.add(new Double(len/(cnt*cal.frameInterval))); <- This is wrong!
 							msdList.add(new Double(len/cnt));
 							dframe.add(new Double(k*cal.frameInterval));
-
 						}
 						//			else
 						//				msdList[k-1]=0;
 						if(PTA.isDebug())
 							IJ.log("k="+k);
-						//				IJ.log("msdList["+(k-1)+"]="+msdList[k-1]+", cnt="+cnt);
-						//			dframe[k-1] = k*cal.frameInterval;
 					}
 		} catch (Exception e) {
 			IJ.log("calcMsd:"+e.toString());
