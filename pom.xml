@@ -13,7 +13,7 @@
 
 	<groupId>yo4.ara</groupId>
 	<artifactId>PTA_</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.a-SNAPSHOT</version>
 
 	<name>plugins/PTA_</name>
   <description>A Maven project implementing an ImageJ 1.x plugin
@@ -36,6 +36,11 @@
 			<artifactId>jfreechart</artifactId>
 			<version>1.0.13</version>
 		</dependency>
+		<dependency>
+	  		<groupId>org.apache.commons</groupId>
+	  		<artifactId>commons-math3</artifactId>
+	  		<version>3.4</version>
+  		</dependency>
 	</dependencies>
 
 
@@ -85,5 +90,22 @@
 		<url>https://github.com/imagej/minimal-ij1-plugin</url>
   </scm>
   -->
+	<properties>
+		<main-class>PTA</main-class>
+	</properties>
 
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>${main-class}</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>

@@ -1,6 +1,5 @@
 package pta.track;
 
-//import jaolho.data.lma.LMA;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,17 +7,12 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
-//import ZS.Solve.LMfunc;
-//import ZS.Solve.LM;
-
-
-
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer;
 import pta.*;
 import pta.calc.FitMSD;
 import pta.data.*;
 import pta.gui.ShowPdata;
-
-
+import tdgaussian.*;
 
 import ij.*;
 import ij.gui.*;
@@ -240,6 +234,7 @@ public class DetectParticle extends Thread implements Measurements{
 							IJ.log("param:"+Arrays.toString(param));
 						// fit 2DGauss
 						info[1] = ptap.getIterationNumber(); //iteration limit number
+						info[0] = 1000; //max number of evaluation
 						boolean fit = false;
 //						double dsize = ptap.getRoiSize()%2==0?ptap.getRoiSize()/2:(ptap.getRoiSize()+1)/2;
 						double dsizex = ptap.getRoiSizex()%2==0?ptap.getRoiSizex()/2:(ptap.getRoiSizex()+1)/2;
@@ -254,50 +249,18 @@ public class DetectParticle extends Thread implements Measurements{
 								param[2] /= cal.pixelHeight;
 								param[3] = (double)ptap.getRoiSizex()/2.0D;
 								param[4] = (double)ptap.getRoiSizey()/2.0D;
-								param = PTA.fit2DGauss(fionaData,param,ptap.getRoiSizex(),ptap.getRoiSizey(),info); //DO 2d gaussian Fitting!!
-								param[3] *= cal.pixelWidth; // to translate pixel data to unit data
-								param[4] *= cal.pixelHeight;
-								param[3] += (double)ixx*cal.pixelWidth;
-								param[4] += (double)iyy*cal.pixelHeight;
-								param[1] *= cal.pixelWidth;
-								param[2] *= cal.pixelHeight;
-//							} else if (ptap.isDo2dGaussfitbyLMA()) { //---from--- test for LMA with JAMA
-//
-//									param[1] /= cal.pixelWidth;
-//									param[2] /= cal.pixelHeight;
-//									param[3] = (double)ptap.getRoiSizex()/2.0D;
-//									param[4] = (double)ptap.getRoiSizey()/2.0D;
-//			// --from-- test by LM
-//									LMfunc f = new LM2DGauss();
-//									double[] s = new double[ptap.getRoiSizex()*ptap.getRoiSizey()];
-//									double[][] lmx = new double[ptap.getRoiSizex()*ptap.getRoiSizey()][2];
-//									int kkkindex=0;
-//									for(int jjjj=0;jjjj<ptap.getRoiSizex();jjjj++)
-//										for(int iiii=0;iiii<ptap.getRoiSizey();iiii++) {
-//										lmx[kkkindex][0]=iiii;
-//										lmx[kkkindex][1]=jjjj;
-//										kkkindex++;
-//										}
-//									for(int kkk=0;kkk<ptap.getRoiSizex()*ptap.getRoiSizey();kkk++)
-//										s[kkk]=0.1;
-//									boolean[] vary = new boolean[param.length];
-//									for( int jjj = 0; jjj < param.length; jjj++ ) vary[jjj] = true;
-//									try {
-//										LM.solve(lmx, param, fionaData, s, vary, f, 0.001, 0.01, 1000, 0);
-//									} catch (Exception e) {
-//										// TODO Auto-generated catch block
-//										IJ.log(e.toString());
-//									}
-//									info[0]=1;
-//			// --- to ---
-//							
-//									param[3] *= cal.pixelWidth; // to translate pixel data to unit data
-//									param[4] *= cal.pixelHeight;
-//									param[3] += (double)ixx*cal.pixelWidth;
-//									param[4] += (double)iyy*cal.pixelHeight;
-//									param[1] *= cal.pixelWidth;
-//									param[2] *= cal.pixelHeight;
-
+//								param = PTA.fit2DGauss(fionaData,param,ptap.getRoiSizex(),ptap.getRoiSizey(),info); //DO 2d gaussian Fitting!!
+								TwoDGaussProblem tdgp =  new TwoDGaussProblem(fionaData, param, ptap.getRoiSizex(), info);
+								LeastSquaresOptimizer.Optimum opt = tdgp.fit2dGauss();
+								final double[] fittedParam = opt.getPoint().toArray();
+								param[0] = fittedParam[0];
+								param[5] = fittedParam[5];
+								param[3] = fittedParam[3] * cal.pixelWidth; // to translate pixel data to unit data
+								param[4] = fittedParam[4] * cal.pixelHeight;
+								param[3] = fittedParam[3] + (double)ixx*cal.pixelWidth;
+								param[4] = fittedParam[4] + (double)iyy*cal.pixelHeight;
+								param[1] = fittedParam[1] * cal.pixelWidth;
+								param[2] = fittedParam[2] * cal.pixelHeight;
 								} else {
 								//---to---
 								param[0] = intInt;
