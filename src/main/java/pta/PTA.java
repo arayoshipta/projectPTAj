@@ -821,7 +821,7 @@ public class PTA extends PlugInFrame{
 		public void stateChanged(ChangeEvent e) {
 			if (pData !=null) {
 				pData.updatejt();
-			}			// TODO Auto-generated method stub			
+			}
 		}
 		
 	}

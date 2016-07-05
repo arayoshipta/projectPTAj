@@ -249,6 +249,7 @@ public class DetectParticle extends Thread implements Measurements{
 								param[2] /= cal.pixelHeight;
 								param[3] = (double)ptap.getRoiSizex()/2.0D;
 								param[4] = (double)ptap.getRoiSizey()/2.0D;
+<<<<<<< HEAD
 //								param = PTA.fit2DGauss(fionaData,param,ptap.getRoiSizex(),ptap.getRoiSizey(),info); //DO 2d gaussian Fitting!!
 								TwoDGaussProblem tdgp =  new TwoDGaussProblem(fionaData, param, ptap.getRoiSizex(), info);
 								LeastSquaresOptimizer.Optimum opt = tdgp.fit2dGauss();
@@ -261,6 +262,15 @@ public class DetectParticle extends Thread implements Measurements{
 								param[4] = fittedParam[4] + (double)iyy*cal.pixelHeight;
 								param[1] = fittedParam[1] * cal.pixelWidth;
 								param[2] = fittedParam[2] * cal.pixelHeight;
+=======
+								param = PTA.fit2DGauss(fionaData,param,ptap.getRoiSizex(),ptap.getRoiSizey(),info); //DO 2d gaussian Fitting!!
+								param[3] *= cal.pixelWidth; // to translate pixel data to unit data
+								param[4] *= cal.pixelHeight;
+								param[3] += (double)ixx*cal.pixelWidth;
+								param[4] += (double)iyy*cal.pixelHeight;
+								param[1] *= cal.pixelWidth;
+								param[2] *= cal.pixelHeight;
+>>>>>>> cd5da7fa823414c767568690a6e859f68923d33f
 								} else {
 								//---to---
 								param[0] = intInt;
@@ -376,9 +386,6 @@ public class DetectParticle extends Thread implements Measurements{
 		}
 		FitMSD fitmsd = new FitMSD(linkedPointList, cal);
 		ArrayList<MSDdata> reslist = fitmsd.doMSDanalysis(leastlenTime, isLinear);
-		
-		//@TODO there could be some filter here. 
-		
 		return reslist;
 	}
 
@@ -394,7 +401,6 @@ public class DetectParticle extends Thread implements Measurements{
 			return null;
 		FitMSD fitmsd = new FitMSD(linkedPointList, cal);
 		ArrayList<MSDdata> reslist = fitmsd.doMSDanalysis(selectedList, leastlenTime, isLinear);
-		//@TODO there could be some filter here. 		
 		return reslist;
 	}	
 
