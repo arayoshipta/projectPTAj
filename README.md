@@ -1,4 +1,9 @@
 #ATTENTION
+I have deleted some files that contains error in MSD plots.
+Please use PTA_.jar in jar folder.
+Sorry for your inconvinience.
+2016.07.05
+-----
 I have corrected the inadequate indication in MSD plot.
 Please use the latest version of PTA_.jar and manual.
 
