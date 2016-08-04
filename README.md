@@ -1,4 +1,19 @@
 #ATTENTION
+I have uploaded new version of PTA (PTA2).
+Although PTA2 is still SNAPSHOT version, it would be more useful than PTA because,
+
+1. Point detection can be performed by 'find maxima' of ImageJ
+2. Four different methods for localization can be used. "Find maxima", "Centroid", Center of Mass", and "2D Gaussian fitting"
+3. No need to use .dll (.jnilib) file. 
+4. Simple edit tool for trackes are equiped (delete, split, and concatenate)
+5. You can call PTA2 from macro
+
+PTA2 can be found here.
+https://github.com/arayoshipta/PTA2
+
+2016.08.04
+
+=======
 I have deleted some files that contains error in MSD plots.
 Please use PTA_.jar in jar folder.
 Sorry for your inconvinience.
